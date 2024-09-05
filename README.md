@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Whoknows Variations
 
 This is the Whoknows variations repository. It is not meant for production as it contains several security vulnerabilities and problematic parts on purpose. 
@@ -26,4 +25,3 @@ If you have any suggestions or improvements to the tutorials, feel free to open 
 =======
 # whoKnows
 Legacy from DevOps
->>>>>>> 19eadbe129b4e71812105dc71ccdb81ee16046a8
