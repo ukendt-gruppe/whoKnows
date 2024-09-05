@@ -10,7 +10,8 @@ from flask import Flask, request, session, url_for, redirect, render_template, g
 # Configuration
 ################################################################################
 
-DATABASE_PATH = './whoknows.db'
+# make sure the path is correct for whoknows.db in the backend folder
+DATABASE_PATH = os.path.join(os.path.dirname(__file__), 'whoknows.db')
 PER_PAGE = 30
 DEBUG = False
 SECRET_KEY = 'development key'
@@ -35,7 +36,7 @@ def check_db_exists():
     """Checks if the database exists."""
     db_exists = os.path.exists(DATABASE_PATH)
     if not db_exists:
-        print("Database not found")
+        print(f"Database not found at: {DATABASE_PATH}")
         sys.exit(1)
     else:
         return db_exists
@@ -49,13 +50,15 @@ def init_db():
         db.commit()
         print("Initialized the database: " + str(DATABASE_PATH))
 
-
+# Use sqlite3.Row as the row factory to simplify dictionary creation.
+# This allows you to access columns by name instead of by index.
 def query_db(query, args=(), one=False):
     """Queries the database and returns a list of dictionaries."""
-    cur = g.db.execute(query, args)
-    rv = [dict((cur.description[idx][0], value)
-               for idx, value in enumerate(row)) for row in cur.fetchall()]
-    return (rv[0] if rv else None) if one else rv
+    with sqlite3.connect(DATABASE_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        cur = conn.execute(query, args)
+        rv = cur.fetchall()
+    return (dict(rv[0]) if rv else None) if one else [dict(row) for row in rv]
 
 
 def get_user_id(username):
