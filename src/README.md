@@ -37,7 +37,7 @@ $ make run
 Or:
 
 ```bash
-$ python2 app.py
+$ python app.py
 ```
 
 ## Test the application
@@ -51,5 +51,5 @@ $ make test
 Or:
 
 ```bash
-$ python2 ./app_tests.py
+$ python ./app_tests.py
 ```
