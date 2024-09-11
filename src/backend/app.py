@@ -10,6 +10,7 @@ from flask import Flask, request, session, url_for, redirect, render_template, g
 # Configuration
 ################################################################################
 
+
 # make sure the path is correct for whoknows.db in the backend folder
 DATABASE_PATH = os.path.join(os.path.dirname(__file__), 'whoknows.db')
 PER_PAGE = 30
