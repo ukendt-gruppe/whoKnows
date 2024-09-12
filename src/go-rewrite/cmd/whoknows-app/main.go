@@ -15,8 +15,11 @@ func main() {
     log.Println("Database initialized successfully.")
 
     // Set up routes
-    http.HandleFunc("/test", handlers.TestHandler)
+    http.HandleFunc("/", handlers.SearchHandler)
+    http.HandleFunc("/login", handlers.LoginHandler)
+    http.HandleFunc("/register", handlers.RegisterHandler)
     http.HandleFunc("/about", handlers.AboutHandler)
+    http.HandleFunc("/test", handlers.TestHandler)
 
 
     // Serve static files
