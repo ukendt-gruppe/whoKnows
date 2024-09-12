@@ -1,11 +1,26 @@
-{% extends "layout.html" %}
+{{define "about"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Who Knows?</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body>
+    <div class="page">
+        {{template "navigation" .}}
+        
+        <div class="body">
+            <h1>Our mission</h1>
+            <p>We intend to build the world's best search engine!</p>
 
-{% block title %}About{% endblock %}
+            <h2>Our team</h2>
+            <img src="/static/monkgroup.png" alt="monk group our team" style="height: 50vh;">
+        </div>
 
-{% block body %}
-<h1>Our mission</h1>
-<p>We intend to build the world's best search engine!</p>
-
-<h2>Our team</h2>
-<img src="{{ url_for('static', filename='monkgroup.png') }}" alt="monk group our team" style="height: 50vh;">
-{% endblock %}
+        {{template "footer" .}}
+    </div>
+</body>
+</html>
+{{end}}
