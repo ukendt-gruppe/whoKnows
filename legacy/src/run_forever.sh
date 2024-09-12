@@ -6,7 +6,7 @@ TMP=$?
 
 while true
 do
-    python "$PYTHON_SCRIPT_PATH"
+    python3 "$PYTHON_SCRIPT_PATH"
     if [ $TMP -ne 0 ]; then
         echo "Script crashed with exit code $TMP. Restarting..." >&2
         sleep 1
