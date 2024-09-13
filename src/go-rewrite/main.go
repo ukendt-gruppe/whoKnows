@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-    if err := db.InitDB("src/go-rewrite/schema.sql"); err != nil {
+    if err := db.InitDB("./schema.sql"); err != nil {
         log.Fatalf("Could not initialize database: %v", err)
     }
     log.Println("Database initialized successfully.")
