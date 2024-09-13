@@ -6,7 +6,7 @@ import (
     "log"
 )
 
-var templates = template.Must(template.ParseGlob("src/go-rewrite/frontend/templates/*.html"))
+var templates = template.Must(template.ParseGlob("./frontend/templates/*.html"))
 
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	// Render the "search" template without any additional data
