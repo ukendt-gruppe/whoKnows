@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/ukendt-gruppe/whoKnows/src/go-rewrite/internal/db"
+	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
 )
 
 var templates = template.Must(template.ParseGlob("../frontend/templates/*.html"))

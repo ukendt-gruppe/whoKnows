@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/ukendt-gruppe/whoKnows/src/go-rewrite/internal/db"
-	"github.com/ukendt-gruppe/whoKnows/src/go-rewrite/internal/handlers"
+	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
+	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/handlers"
 )
 
 func main() {
