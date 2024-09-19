@@ -1,27 +1,36 @@
 {{define "search"}}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search - Who Knows?</title>
     <link rel="stylesheet" type="text/css" href="/static/style.css">
 </head>
+
 <body>
     <div class="page">
         {{template "navigation" .}}
-        
+
         <div class="body">
             <input id="search-input" placeholder="Search..." value="{{.Query}}" />
             <button onclick="makeSearchRequest()">Search</button>
         </div>
 
         <div id="results">
+            {{if .SearchResults}}
+            <!-- If search results exist, iterate over them and display each result as a clickable link. -->
             {{range .SearchResults}}
             <div>
-                <h2><a class="search-result-title" href="{{.URL}}">{{.Title}}</a></h2>
-                <p class="search-result-description">{{.Description}}</p>
+                <!-- Display the title of the result as a link. 
+                     The "href" points to the page URL, and the "title" is the clickable text. -->
+                <h2><a class="search-result-title" href="{{.url}}">{{.title}}</a></h2>
             </div>
+            {{end}}
+            {{else}}
+            <!-- If no search results are found, display a message indicating that no matches were found for the query. -->
+            <p>No results found for "{{.Query}}"</p>
             {{end}}
         </div>
 
@@ -53,5 +62,6 @@
         {{template "footer" .}}
     </div>
 </body>
+
 </html>
 {{end}}
