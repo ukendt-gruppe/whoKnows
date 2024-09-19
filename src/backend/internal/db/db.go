@@ -9,7 +9,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const DATABASE_PATH = "./whoknows.db"
+const DATABASE_PATH = "./internal/db/whoknows.db"
 
 // ConnectDB returns a new connection to the database.
 func ConnectDB() (*sql.DB, error) {
