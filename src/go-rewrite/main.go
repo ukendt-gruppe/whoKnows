@@ -1,11 +1,11 @@
 package main
 
 import (
-    "log"
-    "net/http"
+	"log"
+	"net/http"
 
-    "github.com/ukendt-gruppe/whoKnows/src/go-rewrite/internal/db"
-    "github.com/ukendt-gruppe/whoKnows/src/go-rewrite/internal/handlers"
+	"github.com/ukendt-gruppe/whoKnows/src/go-rewrite/internal/db"
+	"github.com/ukendt-gruppe/whoKnows/src/go-rewrite/internal/handlers"
 )
 
 func main() {
@@ -23,7 +23,7 @@ func main() {
 
 
     // Serve static files
-    fs := http.FileServer(http.Dir("src/go-rewrite/frontend/static"))
+    fs := http.FileServer(http.Dir("./frontend/static"))
     http.Handle("/static/", http.StripPrefix("/static/", fs))
 
     // Start the server
