@@ -10,7 +10,7 @@
 <body>
     <div class="page">
         {{template "navigation" .}}
-        
+       
         <!-- Flash messages section -->
         {{if .Flashes}}
         <ul class="flashes">
@@ -19,11 +19,9 @@
             {{end}}
         </ul>
         {{end}}
-
         <div class="body">
             {{block "body" .}}{{end}}
         </div>
-
         {{template "footer" .}}
     </div>
 </body>
@@ -34,6 +32,7 @@
 <div class="navigation">
     <nav>
         <h1><a id="nav-logo" href="/">¿Who Knows?</a></h1>
+        <a href="/weather">Weather</a>
         {{if .User}}
             <a id="nav-logout" href="/logout">Log out [{{.User.Username}}]</a>
         {{else}}
