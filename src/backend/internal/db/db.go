@@ -2,51 +2,45 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
+	"encoding/gob"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
 )
 
 const DATABASE_PATH = "./internal/db/whoknows.db"
 
-// ConnectDB returns a new connection to the database.
-func ConnectDB() (*sql.DB, error) {
-	// Attempt to open a connection to the SQLite database
-	db, err := sql.Open("sqlite3", DATABASE_PATH)
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to database: %v", err)
-	}
-	return db, nil
-}
+var DB *sql.DB
 
-// CheckDBExists checks if the database file exists.
-func CheckDBExists() bool {
-	if _, err := os.Stat(DATABASE_PATH); os.IsNotExist(err) {
-		log.Printf("Database not found at: %s", DATABASE_PATH)
-		return false
-	}
-	return true
-}
+var (
+	ErrUserNotFound = errors.New("user not found")
+	ErrInvalidUser  = errors.New("invalid user")
+)
 
-// InitDB initializes the database with the given schema.
+// InitDB initializes the database connection and creates tables if they don't exist.
 func InitDB(schemaPath string) error {
-	// Connect to the database
-	db, err := ConnectDB()
+	var err error
+	DB, err = sql.Open("sqlite3", DATABASE_PATH)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to connect to database: %v", err)
 	}
-	defer db.Close() // Ensure the database connection is closed when this function exits
 
-	// Read the SQL schema file
+	// Check if the database file exists
+	if _, err := os.Stat(DATABASE_PATH); os.IsNotExist(err) {
+		log.Printf("Database not found at: %s. Creating new database.", DATABASE_PATH)
+	}
+
+	// Read and execute the schema
 	schema, err := os.ReadFile(schemaPath)
 	if err != nil {
 		return fmt.Errorf("failed to read schema file: %v", err)
 	}
 
-	// Execute the schema file content to initialize the database tables
-	_, err = db.Exec(string(schema))
+	_, err = DB.Exec(string(schema))
 	if err != nil {
 		return fmt.Errorf("failed to execute schema: %v", err)
 	}
@@ -57,15 +51,8 @@ func InitDB(schemaPath string) error {
 
 // QueryDB executes a query and returns the results as a slice of maps.
 func QueryDB(query string, args ...interface{}) ([]map[string]interface{}, error) {
-	// Connect to the database
-	db, err := ConnectDB()
-	if err != nil {
-		return nil, err
-	}
-	defer db.Close()
-
 	// Execute the query
-	rows, err := db.Query(query, args...)
+	rows, err := DB.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %v", err)
 	}
@@ -79,12 +66,10 @@ func QueryDB(query string, args ...interface{}) ([]map[string]interface{}, error
 
 	// Prepare a slice of maps to hold the query results
 	var results []map[string]interface{}
-
 	for rows.Next() {
 		// Create a slice of interfaces to hold each column value
 		columnsData := make([]interface{}, len(columns))
 		columnsPointers := make([]interface{}, len(columns))
-
 		for i := range columnsData {
 			columnsPointers[i] = &columnsData[i]
 		}
@@ -93,7 +78,7 @@ func QueryDB(query string, args ...interface{}) ([]map[string]interface{}, error
 		if err := rows.Scan(columnsPointers...); err != nil {
 			return nil, fmt.Errorf("failed to scan row: %v", err)
 		}
-		
+
 		// Create a map to store the row data
 		rowMap := make(map[string]interface{})
 		for i, colName := range columns {
@@ -109,23 +94,60 @@ func QueryDB(query string, args ...interface{}) ([]map[string]interface{}, error
 
 // GetUserID looks up the ID for a given username.
 func GetUserID(username string) (int, error) {
-	// Connect to the database
-	db, err := ConnectDB()
-	if err != nil {
-		return 0, err
-	}
-	defer db.Close()
-
-	// Prepare the query
 	var id int
 	query := "SELECT id FROM users WHERE username = ?"
-	err = db.QueryRow(query, username).Scan(&id)
-
+	err := DB.QueryRow(query, username).Scan(&id)
 	if err == sql.ErrNoRows {
 		return 0, nil // No matching user found
 	} else if err != nil {
-		return 0, fmt.Errorf("failed to query user ID: %v", err) // An error occurred during the query
+		return 0, fmt.Errorf("failed to query user ID: %v", err)
+	}
+	return id, nil
+}
+
+// GetUser retrieves a user by username.
+func GetUser(identifier interface{}) (*User, error) {
+	var user User
+	var err error
+	switch v := identifier.(type) {
+	case string:
+		err = DB.QueryRow("SELECT id, username, email, password FROM users WHERE username = ?", v).Scan(
+			&user.ID, &user.Username, &user.Email, &user.Password)
+	case int:
+		err = DB.QueryRow("SELECT id, username, email, password FROM users WHERE id = ?", v).Scan(
+			&user.ID, &user.Username, &user.Email, &user.Password)
+	default:
+		return nil, ErrInvalidUser
+	}
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+// CreateUser creates a new user in the database.
+func CreateUser(username, email, password string) error {
+	hashedPassword, err := utils.HashPassword(password)
+	if err != nil {
+		return err
 	}
 
-	return id, nil
+	_, err = DB.Exec("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+		username, email, hashedPassword)
+	return err
+}
+
+// User represents a user in the database.
+type User struct {
+  ID       int
+  Username string
+  Email    string
+  Password string
+}
+
+func init() {
+  gob.Register(&User{})
 }

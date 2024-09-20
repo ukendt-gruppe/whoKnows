@@ -1,0 +1,25 @@
+{{define "weather"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather - Who Knows?</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body>
+    <div class="page">
+        {{template "navigation" .}}
+        <div class="body">
+            <h2>Weather Information</h2>
+            <div class="weather-info">
+                <p>Location: {{.Location}}</p>
+                <p>Temperature: {{.Temperature}}°C</p>
+                <p>Condition: {{.Condition}}</p>
+            </div>
+        </div>
+        {{template "footer" .}}
+    </div>
+</body>
+</html>
+{{end}}

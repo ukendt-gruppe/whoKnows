@@ -5,83 +5,183 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/sessions"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
+	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
 )
 
 var templates = template.Must(template.ParseGlob("../frontend/templates/*.html"))
 
-// SearchHandler is responsible for processing HTTP requests related to search queries.
-// It fetches the query parameter from the URL, interacts with the SQLite database, and renders the search results page.
-// This function logs any errors encountered during the process, following best practices for observability.
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
-	// Extract the search query from the request URL.
+	session := r.Context().Value("session").(*sessions.Session)
 	query := r.URL.Query().Get("q")
-
-	// Initialize the search results slice and error variable.
 	var searchResults []map[string]interface{}
 	var err error
 
-	// If a query exists, proceed to search the database for relevant records.
 	if query != "" {
-		// Query the database for pages where the title or content matches the search term.
-		// Using parameterized queries to prevent SQL injection, ensuring security.
-		searchResults, err = db.QueryDB("SELECT title, url, content FROM pages WHERE title LIKE ? OR content LIKE ?", "%"+query+"%", "%"+query+"%")
-
-		// Implementing proper error handling to ensure any database query failures are logged for future investigation (troubleshooting).
+		rows, err := db.DB.Query("SELECT title, url, content FROM pages WHERE title LIKE ? OR content LIKE ?", "%"+query+"%", "%"+query+"%")
 		if err != nil {
-			log.Printf("Database query failed: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
+		defer rows.Close()
+
+		for rows.Next() {
+				var title, url, content string
+				err = rows.Scan(&title, &url, &content)
+				if err != nil {
+						http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+						return
+				}
+				result := map[string]interface{}{
+						"title":   title,
+						"url":     url,
+						"content": content,
+				}
+				searchResults = append(searchResults, result)
+		}
 	}
 
-	// Prepare the data structure to pass to the template renderer.
-	// This includes both the search query and the results fetched from the database.
 	data := map[string]interface{}{
 		"Query":         query,
 		"SearchResults": searchResults,
+		"User":          session.Values["user"],
+		"FlashMessages": session.Flashes(),
 	}
 
-	// Render the "search" template, injecting the data (query and results) into the HTML.
-	// Observability: Log any rendering errors to monitor potential issues with the templating system.
 	err = templates.ExecuteTemplate(w, "search", data)
 	if err != nil {
-		log.Printf("Error rendering search template: %v", err)
 		http.Error(w, "Error rendering page", http.StatusInternalServerError)
 	}
+	session.Save(r, w)
 }
 
-// LoginHandler renders the login template
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	// Render the "login" template without any additional data
-	err := templates.ExecuteTemplate(w, "login", nil)
-	if err != nil {
-		log.Printf("Error rendering login template: %v", err)
-		http.Error(w, "Error rendering page", http.StatusInternalServerError)
-	}
+  session := r.Context().Value("session").(*sessions.Session)
+  data := map[string]interface{}{
+    "Flashes": session.Flashes(),
+    "User":    session.Values["user"],
+  }
+  
+  if r.Method == "POST" {
+    username := r.FormValue("username")
+    password := r.FormValue("password")
+    user, err := db.GetUser(username)
+    if err != nil {
+      if err == db.ErrUserNotFound {
+        data["Error"] = "Invalid username or password"
+      } else {
+        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+        return
+      }
+    } else if user != nil && utils.CheckPasswordHash(password, user.Password) {
+      session.Values["user"] = user
+      session.Values["user_id"] = user.ID
+      session.AddFlash("You were logged in")
+			err = session.Save(r, w)
+			if err != nil {
+					log.Printf("Error saving session: %v", err)
+					http.Error(w, "Error saving session", http.StatusInternalServerError)
+					return
+			}
+      http.Redirect(w, r, "/", http.StatusSeeOther)
+      return
+    } else {
+      data["Error"] = "Invalid username or password"
+    }
+    data["Username"] = username
+  }
+  
+  err := templates.ExecuteTemplate(w, "login", data)
+  if err != nil {
+    http.Error(w, "Error rendering page", http.StatusInternalServerError)
+  }
 }
 
-// RegisterHandler renders the register template
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	// Render the "register" template without any additional data
-	err := templates.ExecuteTemplate(w, "register", nil)
+	session := r.Context().Value("session").(*sessions.Session)
+	data := map[string]interface{}{
+		"Flashes": session.Flashes(),
+		"User":    session.Values["user"],
+	}
+
+	if r.Method == "POST" {
+		username := r.FormValue("username")
+		email := r.FormValue("email")
+		password := r.FormValue("password")
+		password2 := r.FormValue("password2")
+
+		if password != password2 {
+			data["Error"] = "The two passwords do not match"
+		} else {
+			user, err := db.GetUser(username)
+			if err != nil && err != db.ErrUserNotFound {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			if user != nil {
+				data["Error"] = "The username is already taken"
+			} else {
+				err := db.CreateUser(username, email, password)
+				if err != nil {
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+				session.AddFlash("You were successfully registered and can login now")
+				session.Save(r, w)
+				http.Redirect(w, r, "/login", http.StatusSeeOther)
+				return
+			}
+		}
+		data["Username"] = username
+		data["Email"] = email
+	}
+
+	err := templates.ExecuteTemplate(w, "register", data)
 	if err != nil {
-		log.Printf("Error rendering register template: %v", err)
 		http.Error(w, "Error rendering page", http.StatusInternalServerError)
 	}
+	session.Save(r, w)
+}
+
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+    session := r.Context().Value("session").(*sessions.Session)
+    delete(session.Values, "user")
+    log.Println("User logged out:", session.Values["user"])
+    session.AddFlash("You were logged out")
+    err := session.Save(r, w)
+    if err != nil {
+        http.Error(w, "Error saving session", http.StatusInternalServerError)
+        return
+    }
+    http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 // AboutHandler renders the about template
 func AboutHandler(w http.ResponseWriter, r *http.Request) {
-	// Render the "about" template without any additional data
-	err := templates.ExecuteTemplate(w, "about", nil)
+	session := r.Context().Value("session").(*sessions.Session)
+	data := map[string]interface{}{
+		"User": session.Values["user"],  // Pass User to the template
+	}
+
+	err := templates.ExecuteTemplate(w, "about", data)
 	if err != nil {
 		log.Printf("Error rendering about template: %v", err)
 		http.Error(w, "Error rendering page", http.StatusInternalServerError)
 	}
 }
 
-// TestHandler renders the test template w/o errors
-func TestHandler(w http.ResponseWriter, r *http.Request) {
-	templates.ExecuteTemplate(w, "test", nil)
+func WeatherHandler(w http.ResponseWriter, r *http.Request) {
+	session := r.Context().Value("session").(*sessions.Session)
+	weatherData := map[string]interface{}{
+		"Temperature": 22,
+		"Condition":   "Sunny",
+		"Location":    "Copenhagen",
+		"User":        session.Values["user"],  // Pass User to the template
+	}
+
+	err := templates.ExecuteTemplate(w, "weather", weatherData)
+	if err != nil {
+		http.Error(w, "Error rendering page", http.StatusInternalServerError)
+	}
 }
