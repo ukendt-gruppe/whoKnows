@@ -3,11 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
-    "github.com/joho/godotenv"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/handlers"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/middleware"
@@ -19,13 +17,8 @@ var (
 )
 
 func init() {
-    // Load environment variables from .env file
-    if err := godotenv.Load(); err != nil {
-        log.Fatal("Error loading .env file")
-    }
-
     // Initialize session store using SESSION_KEY from environment variable
-    sessionKey := os.Getenv("SESSION_KEY")
+    sessionKey := "your-session-key"
     if sessionKey == "" {
         log.Fatal("SESSION_KEY environment variable is required")
     }
