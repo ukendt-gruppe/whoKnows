@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
+	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
 )
 
 // SearchResponse represents the response for the search API
@@ -19,8 +19,8 @@ type StandardResponse struct {
 
 // AuthResponse represents the response for authentication-related APIs
 type AuthResponse struct {
-	StatusCode *int    `json:"statusCode,omitempty"`
-	Message    *string `json:"message,omitempty"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
 }
 
 // RequestValidationError represents validation errors
@@ -54,9 +54,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := SearchResponse{Data: searchResults}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)  // Ensure status 200
-	json.NewEncoder(w).Encode(response)
+	utils.JSONResponse(w, http.StatusOK, response)	// Ensure status 200
 }
 
 // Weather handles the /api/weather endpoint
@@ -66,9 +64,7 @@ func Weather(w http.ResponseWriter, r *http.Request) {
 		"condition":   "Sunny",
 	}
 	response := StandardResponse{Data: weatherData}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	utils.JSONResponse(w, http.StatusOK, response)
 }
 
 // Register handles the /api/register endpoint
@@ -88,23 +84,20 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	if username == "" || password == "" {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnprocessableEntity)  // Return 422 for validation error
-		json.NewEncoder(w).Encode(RequestValidationError{
-			StatusCode: 422,
-			Message:    "All fields are required",
-		})
-		return
+			utils.JSONResponse(w, http.StatusUnprocessableEntity, RequestValidationError{
+					StatusCode: http.StatusUnprocessableEntity,	// Return 422 for validation error
+					Message:    "All fields are required",
+			})
+			return
 	}
 
 	// Registration logic here
 
-	statusCode := http.StatusOK
-	message := "User registered successfully"
-	response := AuthResponse{StatusCode: &statusCode, Message: &message}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)  // Ensure status 200
-	json.NewEncoder(w).Encode(response)
+	response := AuthResponse{
+			StatusCode: http.StatusOK,
+			Message:    "User registered successfully",
+	}
+	utils.JSONResponse(w, http.StatusOK, response)
 }
 
 // Login handles the /api/login endpoint
@@ -124,43 +117,35 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	if username == "" || password == "" {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnprocessableEntity)  // Return 422 for missing fields
-		json.NewEncoder(w).Encode(RequestValidationError{
-			StatusCode: 422,
-			Message:    "Username and password are required",
-		})
-		return
+			utils.JSONResponse(w, http.StatusUnprocessableEntity, RequestValidationError{
+					StatusCode: http.StatusUnprocessableEntity,	// Return 422 for missing fields
+					Message:    "Username and password are required",
+			})
+			return
 	}
 
 	// Implement authentication logic here
 	// If the credentials are correct, return the success response
 	if username != "" && password != "" {
-		statusCode := http.StatusOK
-		message := "Login successful"
-		response := AuthResponse{StatusCode: &statusCode, Message: &message}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)  // Ensure status 200
-		json.NewEncoder(w).Encode(response)
+			response := AuthResponse{
+					StatusCode: http.StatusOK,		// Ensure status 200
+					Message:    "Login successful",
+			}
+			utils.JSONResponse(w, http.StatusOK, response)
 	} else {
-		// Invalid credentials
-		statusCode := http.StatusUnauthorized  // Assign constant to variable
-		message := "Invalid username or password"  // Assign string to variable
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnauthorized)  // Return 401 for invalid login
-		json.NewEncoder(w).Encode(AuthResponse{
-			StatusCode: &statusCode,
-			Message:    &message,  // Use pointer to variable
-		})
+			response := AuthResponse{
+					StatusCode: http.StatusUnauthorized, // Return 401 for invalid login
+					Message:    "Invalid username or password",
+			}
+			utils.JSONResponse(w, http.StatusUnauthorized, response)
 	}
 }
 
 // Logout handles the /api/logout endpoint
 func Logout(w http.ResponseWriter, r *http.Request) {
-	statusCode := http.StatusOK
-	message := "Logout successful"
-	response := AuthResponse{StatusCode: &statusCode, Message: &message}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	response := AuthResponse{
+			StatusCode: http.StatusOK,
+			Message:    "Logout successful",
+	}
+	utils.JSONResponse(w, http.StatusOK, response)
 }
