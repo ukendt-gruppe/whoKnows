@@ -30,7 +30,5 @@ jobs:
         script: |
           cd /home/azureuser/whoKnows/src/backend
           sudo systemctl stop whoknows.service
-          rm -f whoknows
-          go build -v -o whoknows || { echo "Build failed"; exit 1; } # Build new binary with error handling
-          ls -l # List files to verify
+          go build -v -o whoknows
           sudo systemctl start whoknows.service
