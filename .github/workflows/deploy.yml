@@ -9,6 +9,10 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23.1'
     - name: Copy repository to Azure VM
       uses: appleboy/scp-action@master
       with:
@@ -17,7 +21,6 @@ jobs:
         key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
         source: "."
         target: "/home/azureuser/whoKnows"
-        
     - name: SSH and restart Go application on Azure VM
       uses: appleboy/ssh-action@master
       with:
@@ -25,33 +28,6 @@ jobs:
         username: azureuser
         key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
         script: |
-          # Print current directory and Go version for debugging
-          pwd
-          which go
-          go version
-
-          # Explicitly set PATH to include Go
-          export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
-
-          # Navigate to the correct directory
           cd /home/azureuser/whoKnows/src/backend
-
-          # Print directory contents for debugging
-          ls -la
-
-          # Remove old binary
-          rm -f whoknows
-
-          # Build new binary
           go build -o whoknows
-
-          # Check if build was successful
-          if [ $? -eq 0 ]; then
-            echo "Build successful"
-            # Restart the service
-            sudo systemctl restart whoknows.service
-          else
-            echo "Build failed"
-            exit 1
-          fi
-          
+          sudo systemctl restart whoknows.service
