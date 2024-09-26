@@ -1,3 +1,5 @@
+[![Deploy to Azure VM](https://github.com/ukendt-gruppe/whoKnows/actions/workflows/deploy.yml/badge.svg)](https://github.com/ukendt-gruppe/whoKnows/actions/workflows/deploy.yml)
+
 # Whoknows Variations
 
 This is the Whoknows variations repository. It is not meant for production as it contains several security vulnerabilities and problematic parts on purpose. 
