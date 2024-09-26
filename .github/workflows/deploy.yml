@@ -13,6 +13,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23.1'
+
     - name: Copy repository to Azure VM
       uses: appleboy/scp-action@master
       with:
@@ -29,45 +34,8 @@ jobs:
         username: azureuser
         key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
         script: |
-          # Install Go if it's not installed
-          if ! command -v go &> /dev/null; then
-            echo "Go not found, installing..."
-            wget https://golang.org/dl/go1.23.1.linux-amd64.tar.gz
-            sudo tar -C /usr/local -xzf go1.23.1.linux-amd64.tar.gz
-            echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
-            source ~/.bashrc
-          else
-            echo "Go is already installed."
-          fi
-
-          # Move into the backend directory
           cd /home/azureuser/whoKnows/src/backend
-          
-          # Print the current Go version
-          echo "Checking Go version..."
-          go version || echo "Go is not installed!"
-
-          # Remove the old binary
-          echo "Removing old binary..."
-          rm -f whoknows || echo "No old binary to remove."
-
-          # Build the new binary and capture errors if they occur
-          echo "Building the new binary..."
-          if ! go build -o whoknows; then
-            echo "Go build failed!"
-            exit 1
-          fi
-
-          # Ensure the binary exists
-          if [ ! -f whoknows ]; then
-            echo "Binary not created!"
-            exit 1
-          fi
-
-          # Print the details of the new binary
-          echo "New binary details:"
-          ls -l whoknows
-
-          # Restart the service
-          echo "Restarting the service..."
+          rm -f whoknows
+          go build -o whoknows
           sudo systemctl restart whoknows.service
+          
