@@ -28,16 +28,9 @@ jobs:
         username: azureuser
         key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
         script: |
-                  cd /home/azureuser/whoKnows/src/backend
-                  # Remove the old binary if it exists
-                  if [ -f whoknows ]; then
-                    rm whoknows
-                  fi
-                  # Build the new binary
-                  go build -o whoknows
-                  # Ensure the new binary is executable
-                  chmod +x whoknows
-                  # Restart the service
-                  sudo systemctl restart whoknows.service
-                  # Print the file details for verification
-                  ls -l whoknows
+          cd /home/azureuser/whoKnows/src/backend
+          sudo systemctl stop whoknows.service
+          rm -f whoknows
+          go build -v -o whoknows || { echo "Build failed"; exit 1; } # Build new binary with error handling
+          ls -l # List files to verify
+          sudo systemctl start whoknows.service
