@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
+	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/models"
 )
 
 var templates = template.Must(template.ParseGlob("../frontend/templates/*.html"))
@@ -173,15 +175,25 @@ func AboutHandler(w http.ResponseWriter, r *http.Request) {
 
 func WeatherHandler(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value("session").(*sessions.Session)
-	weatherData := map[string]interface{}{
-		"Temperature": 22,
-		"Condition":   "Sunny",
-		"Location":    "Copenhagen",
-		"User":        session.Values["user"],  // Pass User to the template
+
+	weatherData, err := models.FetchWeather("Copenhagen")
+	if err != nil {
+		log.Printf("Error fetching weather data: %v", err)
+		http.Error(w, "Error fetching weather data", http.StatusInternalServerError)
+		return
 	}
 
-	err := templates.ExecuteTemplate(w, "weather", weatherData)
+	templateData := map[string]interface{}{
+		"Temperature": fmt.Sprintf("%.1f", weatherData.Main.Temp),
+		"Condition":   weatherData.Weather[0].Main,
+		"Description": weatherData.Weather[0].Description,
+		"Location":    weatherData.Name,
+		"User":        session.Values["user"],
+	}
+
+	err = templates.ExecuteTemplate(w, "weather", templateData)
 	if err != nil {
+		log.Printf("Error rendering weather template: %v", err)
 		http.Error(w, "Error rendering page", http.StatusInternalServerError)
 	}
 }

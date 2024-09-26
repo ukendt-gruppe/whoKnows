@@ -5,6 +5,7 @@ import (
 
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
+	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/models"
 )
 
 // SearchResponse represents the response for the search API
@@ -59,11 +60,20 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 // Weather handles the /api/weather endpoint
 func Weather(w http.ResponseWriter, r *http.Request) {
-	weatherData := map[string]interface{}{
-		"temperature": 14,
-		"condition":   "Rainy",
+	weatherData, err := models.FetchWeather("Copenhagen")
+	if err != nil {
+		http.Error(w, "Error fetching weather data", http.StatusInternalServerError)
+		return
 	}
-	response := StandardResponse{Data: weatherData}
+
+	response := utils.StandardResponse{
+		Data: map[string]interface{}{
+			"temperature": weatherData.Main.Temp,
+			"condition":   weatherData.Weather[0].Main,
+			"description": weatherData.Weather[0].Description,
+			"location":    weatherData.Name,
+		},
+	}
 	utils.JSONResponse(w, http.StatusOK, response)
 }
 
