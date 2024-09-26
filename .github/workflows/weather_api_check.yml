@@ -1,0 +1,23 @@
+name: Weather API Check
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  check-weather-api:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.23.1 
+        
+    - name: Check Weather API
+      run: |
+        go run src/backend/internal/models/weather.go
+      env:
+        OPENWEATHERMAP_API_KEY: ${{ secrets.WEATHER_API_KEY }}

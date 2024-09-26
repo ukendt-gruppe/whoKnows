@@ -3,7 +3,9 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 )
 
 type WeatherData struct {
@@ -17,13 +19,15 @@ type WeatherData struct {
 	Name string `json:"name"`
 }
 
-const (
-	openWeatherMapAPIKey = "4ebea85858f373dfd4ad3339f5a4b91b" // Replace with your actual API key
-	weatherAPIURL        = "https://api.openweathermap.org/data/2.5/weather?q=%s&units=metric&APPID=%s"
-)
+const weatherAPIURL = "https://api.openweathermap.org/data/2.5/weather?q=%s&units=metric&APPID=%s"
 
 func FetchWeather(city string) (*WeatherData, error) {
-	url := fmt.Sprintf(weatherAPIURL, city, openWeatherMapAPIKey)
+	apiKey := os.Getenv("WEATHER_API_KEY")
+	if apiKey == "" {
+		return nil, fmt.Errorf("WEATHER_API_KEY environment variable is not set")
+	}
+
+	url := fmt.Sprintf(weatherAPIURL, city, apiKey)
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -41,4 +45,17 @@ func FetchWeather(city string) (*WeatherData, error) {
 	}
 
 	return &data, nil
+}
+
+func main() {
+	city := "Copenhagen"
+	weather, err := FetchWeather(city)
+	if err != nil {
+		log.Fatalf("Error fetching weather for %s: %v", city, err)
+	}
+	fmt.Printf("Weather in %s: %.1f°C, %s (%s)\n", 
+		weather.Name, 
+		weather.Main.Temp, 
+		weather.Weather[0].Main, 
+		weather.Weather[0].Description)
 }
