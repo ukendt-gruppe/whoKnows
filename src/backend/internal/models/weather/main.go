@@ -11,7 +11,18 @@ import (
 	"os"
 )
 
-// ... (keep the WeatherData struct and weatherAPIURL constant)
+type WeatherData struct {
+	Main struct {
+		Temp float64 `json:"temp"`
+	} `json:"main"`
+	Weather []struct {
+		Main        string `json:"main"`
+		Description string `json:"description"`
+	} `json:"weather"`
+	Name string `json:"name"`
+}
+
+const weatherAPIURL = "https://api.openweathermap.org/data/2.5/weather?q=%s&units=metric&APPID=%s"
 
 func fetchWeather(city string) (*WeatherData, error) {
 	apiKey := os.Getenv("WEATHER_API_KEY")
