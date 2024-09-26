@@ -1,27 +1,17 @@
-// File: src/backend/cmd/weather/main.go
+// File: src/backend/internal/models/weather/main.go
 
 package main
 
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 )
 
-type WeatherData struct {
-	Main struct {
-		Temp float64 `json:"temp"`
-	} `json:"main"`
-	Weather []struct {
-		Main        string `json:"main"`
-		Description string `json:"description"`
-	} `json:"weather"`
-	Name string `json:"name"`
-}
-
-const weatherAPIURL = "https://api.openweathermap.org/data/2.5/weather?q=%s&units=metric&APPID=%s"
+// ... (keep the WeatherData struct and weatherAPIURL constant)
 
 func fetchWeather(city string) (*WeatherData, error) {
 	apiKey := os.Getenv("WEATHER_API_KEY")
@@ -30,6 +20,7 @@ func fetchWeather(city string) (*WeatherData, error) {
 	}
 
 	url := fmt.Sprintf(weatherAPIURL, city, apiKey)
+	fmt.Printf("Requesting URL: %s\n", url[:len(url)-40] + "..." + apiKey[len(apiKey)-5:]) // Print URL without exposing full API key
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -37,12 +28,16 @@ func fetchWeather(city string) (*WeatherData, error) {
 	}
 	defer resp.Body.Close()
 
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Printf("Response status: %d\n", resp.StatusCode)
+	fmt.Printf("Response body: %s\n", string(body))
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
 	var data WeatherData
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+	if err := json.Unmarshal(body, &data); err != nil {
 		return nil, fmt.Errorf("error decoding weather data: %v", err)
 	}
 
