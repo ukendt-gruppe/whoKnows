@@ -30,6 +30,32 @@ jobs:
         key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
         script: |
           cd /home/azureuser/whoKnows/src/backend
-          rm -f whoknows
-          go build -o whoknows
+          
+          # Print the current Go version (check if Go is installed)
+          echo "Checking Go version..."
+          go version || echo "Go is not installed!"
+
+          # Remove the old binary
+          echo "Removing old binary..."
+          rm -f whoknows || echo "No old binary to remove."
+
+          # Build the new binary and capture errors if they occur
+          echo "Building the new binary..."
+          if ! go build -o whoknows; then
+            echo "Go build failed!"
+            exit 1
+          fi
+
+          # Ensure the binary exists
+          if [ ! -f whoknows ]; then
+            echo "Binary not created!"
+            exit 1
+          fi
+
+          # Print the details of the new binary
+          echo "New binary details:"
+          ls -l whoknows
+
+          # Restart the service
+          echo "Restarting the service..."
           sudo systemctl restart whoknows.service
