@@ -1,4 +1,6 @@
-package models
+// File: src/backend/cmd/weather/main.go
+
+package main
 
 import (
 	"encoding/json"
@@ -21,7 +23,7 @@ type WeatherData struct {
 
 const weatherAPIURL = "https://api.openweathermap.org/data/2.5/weather?q=%s&units=metric&APPID=%s"
 
-func FetchWeather(city string) (*WeatherData, error) {
+func fetchWeather(city string) (*WeatherData, error) {
 	apiKey := os.Getenv("WEATHER_API_KEY")
 	if apiKey == "" {
 		return nil, fmt.Errorf("WEATHER_API_KEY environment variable is not set")
@@ -49,7 +51,7 @@ func FetchWeather(city string) (*WeatherData, error) {
 
 func main() {
 	city := "Copenhagen"
-	weather, err := FetchWeather(city)
+	weather, err := fetchWeather(city)
 	if err != nil {
 		log.Fatalf("Error fetching weather for %s: %v", city, err)
 	}
