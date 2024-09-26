@@ -60,8 +60,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 // Weather handles the /api/weather endpoint
 func Weather(w http.ResponseWriter, r *http.Request) {
 	weatherData := map[string]interface{}{
-		"temperature": 22,
-		"condition":   "Sunny",
+		"temperature": 14,
+		"condition":   "Rainy",
 	}
 	response := StandardResponse{Data: weatherData}
 	utils.JSONResponse(w, http.StatusOK, response)
