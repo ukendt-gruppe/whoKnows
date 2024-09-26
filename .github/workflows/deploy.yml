@@ -29,9 +29,21 @@ jobs:
         username: azureuser
         key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
         script: |
+          # Install Go if it's not installed
+          if ! command -v go &> /dev/null; then
+            echo "Go not found, installing..."
+            wget https://golang.org/dl/go1.23.1.linux-amd64.tar.gz
+            sudo tar -C /usr/local -xzf go1.23.1.linux-amd64.tar.gz
+            echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
+            source ~/.bashrc
+          else
+            echo "Go is already installed."
+          fi
+
+          # Move into the backend directory
           cd /home/azureuser/whoKnows/src/backend
           
-          # Print the current Go version (check if Go is installed)
+          # Print the current Go version
           echo "Checking Go version..."
           go version || echo "Go is not installed!"
 
