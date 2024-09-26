@@ -15,9 +15,9 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: 1.23.1 
-        
+
     - name: Check Weather API
       run: |
-        go run src/backend/internal/models/weather.go
+        go run testWeather src/backend/internal/models/main.go
       env:
         OPENWEATHERMAP_API_KEY: ${{ secrets.WEATHER_API_KEY }}

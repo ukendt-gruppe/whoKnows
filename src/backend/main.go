@@ -31,6 +31,19 @@ func init() {
     }
 }
 
+func testWeather() {
+	city := "Copenhagen"
+	weather, err := FetchWeather(city)
+	if err != nil {
+		log.Fatalf("Error fetching weather for %s: %v", city, err)
+	}
+	fmt.Printf("Weather in %s: %.1f°C, %s (%s)\n", 
+		weather.Name, 
+		weather.Main.Temp, 
+		weather.Weather[0].Main, 
+		weather.Weather[0].Description)
+}
+
 func main() {
     // Initialize the database
     if err := db.InitDB("./internal/db/schema.sql"); err != nil {
