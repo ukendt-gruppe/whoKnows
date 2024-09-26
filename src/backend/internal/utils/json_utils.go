@@ -11,3 +11,7 @@ func JSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
 	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(data)
 }
+
+type StandardResponse struct {
+	Data interface{} `json:"data"`
+}
