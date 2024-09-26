@@ -18,6 +18,6 @@ jobs:
 
     - name: Check Weather API
       run: |
-        go run src/backend/models/weather/main.go
+        go run src/backend/internal/models/weather/main.go
       env:
         WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
