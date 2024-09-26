@@ -21,8 +21,7 @@ jobs:
         key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
         source: "."
         target: "/home/azureuser/whoKnows"
-        overwrite: true
-
+        
     - name: SSH and restart Go application on Azure VM
       uses: appleboy/ssh-action@master
       with:
@@ -31,5 +30,6 @@ jobs:
         key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
         script: |
           cd /home/azureuser/whoKnows/src/backend
+          rm -f whoknows
           go build -o whoknows
           sudo systemctl restart whoknows.service
