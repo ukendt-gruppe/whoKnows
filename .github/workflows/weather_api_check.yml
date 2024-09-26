@@ -18,6 +18,6 @@ jobs:
 
     - name: Check Weather API
       run: |
-        go run testWeather src/backend/internal/models/main.go
+        go run src/backend/internal/models/main.go
       env:
         OPENWEATHERMAP_API_KEY: ${{ secrets.WEATHER_API_KEY }}
