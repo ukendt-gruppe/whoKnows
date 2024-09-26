@@ -174,8 +174,8 @@ func AboutHandler(w http.ResponseWriter, r *http.Request) {
 func WeatherHandler(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value("session").(*sessions.Session)
 	weatherData := map[string]interface{}{
-		"Temperature": 22,
-		"Condition":   "Sunny",
+		"Temperature": 15,
+		"Condition":   "Rainy",
 		"Location":    "Copenhagen",
 		"User":        session.Values["user"],  // Pass User to the template
 	}
