@@ -29,6 +29,5 @@ jobs:
         key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
         script: |
           cd /home/azureuser/whoKnows/src/backend
-          sudo systemctl stop whoknows.service
-          go build -v -o whoknows
-          sudo systemctl start whoknows.service
+          go build -o whoknows
+          sudo systemctl restart whoknows.service
