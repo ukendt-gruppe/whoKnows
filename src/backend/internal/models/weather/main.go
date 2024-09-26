@@ -1,4 +1,4 @@
-// File: src/backend/internal/models/weather/main.go
+// File: src/backend/internal/models/weather/main.go test
 
 package main
 
