@@ -28,6 +28,40 @@ jobs:
         username: azureuser
         key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
         script: |
+          # Enable error handling and print each command
+          set -e
+          set -x
+          
+          # Log current working directory
+          echo "Current directory before change:"
+          pwd
+
+          # Navigate to the backend directory
+          echo "Changing directory to /home/azureuser/whoKnows/src/backend"
           cd /home/azureuser/whoKnows/src/backend
-          go build -o whoknows
-          sudo systemctl restart whoknows.service
+
+          # Confirm directory change
+          echo "Current directory after change:"
+          pwd
+
+          # Build the Go application and check for errors
+          echo "Building Go application..."
+          if go build -o whoknows; then
+            echo "Go build succeeded."
+          else
+            echo "Go build failed!" >&2
+            exit 1
+          fi
+
+          # Restart the Go application service
+          echo "Restarting the whoknows.service"
+          if sudo systemctl restart whoknows.service; then
+            echo "Service restart succeeded."
+          else
+            echo "Service restart failed!" >&2
+            exit 1
+          fi
+
+          # Log service status
+          echo "Checking service status..."
+          sudo systemctl status whoknows.service
