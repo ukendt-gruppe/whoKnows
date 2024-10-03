@@ -1,0 +1,329 @@
+definitions:
+  handlers.AuthResponse:
+    properties:
+      message:
+        type: string
+      statusCode:
+        type: integer
+    type: object
+  handlers.ErrorResponse:
+    description: Represents an error response.
+    properties:
+      message:
+        type: string
+    type: object
+  handlers.RequestValidationError:
+    properties:
+      message:
+        type: string
+      statusCode:
+        type: integer
+    type: object
+  handlers.SearchResponse:
+    properties:
+      data:
+        items:
+          additionalProperties: true
+          type: object
+        type: array
+    type: object
+  handlers.StandardResponse:
+    properties:
+      data:
+        additionalProperties: true
+        type: object
+    type: object
+info:
+  contact: {}
+paths:
+  /about:
+    get:
+      description: Get the about page information.
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: About Page
+      tags:
+      - Pages
+  /api/login:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Logs in a user with a username and password.
+      parameters:
+      - description: Username
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AuthResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.AuthResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/handlers.RequestValidationError'
+      summary: Log in a user
+      tags:
+      - Authentication
+  /api/logout:
+    get:
+      description: Logs out the current user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AuthResponse'
+      summary: Log out a user
+      tags:
+      - Authentication
+  /api/register:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Registers a new user by taking a username and password.
+      parameters:
+      - description: Username
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AuthResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/handlers.RequestValidationError'
+      summary: Register a new user
+      tags:
+      - Authentication
+  /api/search:
+    get:
+      consumes:
+      - application/json
+      description: Perform a search in the database using a query and language.
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        required: true
+        type: string
+      - description: 'Language (default: en)'
+        in: query
+        name: language
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SearchResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Search for content
+      tags:
+      - Search
+  /api/weather:
+    get:
+      description: Returns the current weather conditions.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.StandardResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Get weather data
+      tags:
+      - Weather
+  /login:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Authenticate user with username and password.
+      parameters:
+      - description: Username
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: User Login
+      tags:
+      - Authentication
+  /logout:
+    post:
+      description: Log out the currently authenticated user.
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: User Logout
+      tags:
+      - Authentication
+  /register:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Register a new user with username, email, and password.
+      parameters:
+      - description: Username
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Email address
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: Confirm Password
+        in: formData
+        name: password2
+        required: true
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: User Registration
+      tags:
+      - Authentication
+  /search:
+    get:
+      consumes:
+      - application/json
+      description: Search pages by query string in title or content.
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Search Pages
+      tags:
+      - Search
+  /weather:
+    get:
+      description: Get the current weather information.
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Weather Information
+      tags:
+      - Weather
+swagger: "2.0"

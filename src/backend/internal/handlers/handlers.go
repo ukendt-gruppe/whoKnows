@@ -10,6 +10,32 @@ import (
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
 )
 
+// @title WhoKnows API
+// @version 1.0
+// @description API documentation for the WhoKnows application.
+// @host localhost:8080
+// @BasePath /
+
+// Define the User model for Swagger
+// @description Represents a user in the system.
+// @property id int "User ID"
+// @property username string "Username"
+// @property email string "Email address"
+// @property password string "Password hash"
+type User struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"-"`
+}
+
+// Define the ErrorResponse model for Swagger
+// @description Represents an error response.
+// @property message string "Error message"
+type ErrorResponse struct {
+	Message string `json:"message"`
+}
+
 var templates = template.Must(template.ParseGlob("../frontend/templates/*.html"))
 
 // @Summary Search Pages
