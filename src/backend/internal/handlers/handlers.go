@@ -10,8 +10,17 @@ import (
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
 )
 
-var templates = template.Must(template.ParseGlob("./frontend/templates/*.html"))
+var templates = template.Must(template.ParseGlob("../frontend/templates/*.html"))
 
+// @Summary Search Pages
+// @Description Search pages by query string in title or content.
+// @Tags Search
+// @Accept  json
+// @Produce  html
+// @Param q query string false "Search query"
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} ErrorResponse
+// @Router /search [get]
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value("session").(*sessions.Session)
 	query := r.URL.Query().Get("q")
@@ -27,18 +36,18 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 		defer rows.Close()
 
 		for rows.Next() {
-				var title, url, content string
-				err = rows.Scan(&title, &url, &content)
-				if err != nil {
-						http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-						return
-				}
-				result := map[string]interface{}{
-						"title":   title,
-						"url":     url,
-						"content": content,
-				}
-				searchResults = append(searchResults, result)
+			var title, url, content string
+			err = rows.Scan(&title, &url, &content)
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			result := map[string]interface{}{
+				"title":   title,
+				"url":     url,
+				"content": content,
+			}
+			searchResults = append(searchResults, result)
 		}
 	}
 
@@ -56,48 +65,72 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	session.Save(r, w)
 }
 
+// @Summary User Login
+// @Description Authenticate user with username and password.
+// @Tags Authentication
+// @Accept  application/x-www-form-urlencoded
+// @Produce  html
+// @Param username formData string true "Username"
+// @Param password formData string true "Password"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /login [post]
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-  session := r.Context().Value("session").(*sessions.Session)
-  data := map[string]interface{}{
-    "Flashes": session.Flashes(),
-    "User":    session.Values["user"],
-  }
-  
-  if r.Method == "POST" {
-    username := r.FormValue("username")
-    password := r.FormValue("password")
-    user, err := db.GetUser(username)
-    if err != nil {
-      if err == db.ErrUserNotFound {
-        data["Error"] = "Invalid username or password"
-      } else {
-        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-        return
-      }
-    } else if user != nil && utils.CheckPasswordHash(password, user.Password) {
-      session.Values["user"] = user
-      session.Values["user_id"] = user.ID
-      session.AddFlash("You were logged in")
+	session := r.Context().Value("session").(*sessions.Session)
+	data := map[string]interface{}{
+		"Flashes": session.Flashes(),
+		"User":    session.Values["user"],
+	}
+
+	if r.Method == "POST" {
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+		user, err := db.GetUser(username)
+		if err != nil {
+			if err == db.ErrUserNotFound {
+				data["Error"] = "Invalid username or password"
+			} else {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+		} else if user != nil && utils.CheckPasswordHash(password, user.Password) {
+			session.Values["user"] = user
+			session.Values["user_id"] = user.ID
+			session.AddFlash("You were logged in")
 			err = session.Save(r, w)
 			if err != nil {
-					log.Printf("Error saving session: %v", err)
-					http.Error(w, "Error saving session", http.StatusInternalServerError)
-					return
+				log.Printf("Error saving session: %v", err)
+				http.Error(w, "Error saving session", http.StatusInternalServerError)
+				return
 			}
-      http.Redirect(w, r, "/", http.StatusSeeOther)
-      return
-    } else {
-      data["Error"] = "Invalid username or password"
-    }
-    data["Username"] = username
-  }
-  
-  err := templates.ExecuteTemplate(w, "login", data)
-  if err != nil {
-    http.Error(w, "Error rendering page", http.StatusInternalServerError)
-  }
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		} else {
+			data["Error"] = "Invalid username or password"
+		}
+		data["Username"] = username
+	}
+
+	err := templates.ExecuteTemplate(w, "login", data)
+	if err != nil {
+		http.Error(w, "Error rendering page", http.StatusInternalServerError)
+	}
 }
 
+// @Summary User Registration
+// @Description Register a new user with username, email, and password.
+// @Tags Authentication
+// @Accept  application/x-www-form-urlencoded
+// @Produce  html
+// @Param username formData string true "Username"
+// @Param email formData string true "Email address"
+// @Param password formData string true "Password"
+// @Param password2 formData string true "Confirm Password"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /register [post]
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value("session").(*sessions.Session)
 	data := map[string]interface{}{
@@ -144,24 +177,39 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	session.Save(r, w)
 }
 
+// @Summary User Logout
+// @Description Log out the currently authenticated user.
+// @Tags Authentication
+// @Produce  html
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} ErrorResponse
+// @Router /logout [post]
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-    session := r.Context().Value("session").(*sessions.Session)
-    delete(session.Values, "user")
-    log.Println("User logged out:", session.Values["user"])
-    session.AddFlash("You were logged out")
-    err := session.Save(r, w)
-    if err != nil {
-        http.Error(w, "Error saving session", http.StatusInternalServerError)
-        return
-    }
-    http.Redirect(w, r, "/", http.StatusSeeOther)
+	session := r.Context().Value("session").(*sessions.Session)
+	delete(session.Values, "user")
+	log.Println("User logged out:", session.Values["user"])
+	session.AddFlash("You were logged out")
+	err := session.Save(r, w)
+	if err != nil {
+		http.Error(w, "Error saving session", http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 // AboutHandler renders the about template
+
+// @Summary About Page
+// @Description Get the about page information.
+// @Tags Pages
+// @Produce  html
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} ErrorResponse
+// @Router /about [get]
 func AboutHandler(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value("session").(*sessions.Session)
 	data := map[string]interface{}{
-		"User": session.Values["user"],  // Pass User to the template
+		"User": session.Values["user"], // Pass User to the template
 	}
 
 	err := templates.ExecuteTemplate(w, "about", data)
@@ -171,13 +219,20 @@ func AboutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Weather Information
+// @Description Get the current weather information.
+// @Tags Weather
+// @Produce  html
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} ErrorResponse
+// @Router /weather [get]
 func WeatherHandler(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value("session").(*sessions.Session)
 	weatherData := map[string]interface{}{
 		"Temperature": 15,
 		"Condition":   "Rainy",
 		"Location":    "Copenhagen",
-		"User":        session.Values["user"],  // Pass User to the template
+		"User":        session.Values["user"], // Pass User to the template
 	}
 
 	err := templates.ExecuteTemplate(w, "weather", weatherData)
