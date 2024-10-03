@@ -61,7 +61,7 @@ func main() {
     api.HandleFunc("/weather", handlers.Weather).Methods("GET")
 
     // Serve static files
-    fs := http.FileServer(http.Dir("../frontend/static"))
+    fs := http.FileServer(http.Dir("./frontend/static"))
     r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
 
     // Start the server

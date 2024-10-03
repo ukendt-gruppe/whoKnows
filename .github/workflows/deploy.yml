@@ -1,0 +1,38 @@
+name: Deploy to Azure VM
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to the 'main' branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the code
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Step 2: Set up SSH for connecting to Azure VM
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.9
+      with:
+        ssh-private-key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
+
+    # Step 3: Sync the application files with the Azure VM
+    - name: Sync project files with Azure VM
+      run: |
+        rsync -avz --exclude '.git*' \
+        ./src/ ${{ secrets.VM_USER }}@${{ secrets.VM_IP_ADDRESS }}:/path/to/your/app
+
+    # Step 4: Build and deploy the Docker container on Azure VM
+    - name: Build and deploy Docker container on VM
+      run: |
+        ssh ${{ secrets.VM_USER }}@${{ secrets.VM_IP_ADDRESS }} << 'EOF'
+          cd /path/to/your/app
+          docker build -t whoknows .
+          docker stop whoknows || true
+          docker rm whoknows || true
+          docker run -d -p 8080:8080 --name whoknows whoknows
+        EOF
