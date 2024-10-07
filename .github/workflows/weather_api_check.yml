@@ -16,9 +16,16 @@ jobs:
       with:
         go-version: 1.23.1
 
+    - name: Install dependencies
+      run: |
+        cd src/backend
+        go mod download
+
     - name: Check Weather API
       run: |
         echo "API Key length: ${#WEATHER_API_KEY}"
-        go run src/backend/internal/models/weather/main.go
+        cd src/backend
+        go run internal/models/weather/main.go
       env:
         WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+        CI: true

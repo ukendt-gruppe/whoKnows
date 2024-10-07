@@ -15,11 +15,13 @@ import (
 )
 
 func init() {
-	// Attempt to load .env file
-	envPath := filepath.Join("..", "..", ".env")
-	err := godotenv.Load(envPath)
-	if err != nil {
-		log.Printf("No .env file found or error loading it. This is fine in production environments.")
+	// Load .env file only if not in a CI environment
+	if os.Getenv("CI") != "true" {
+		envPath := filepath.Join("..", "..", ".env")
+		err := godotenv.Load(envPath)
+		if err != nil {
+			log.Printf("No .env file found or error loading it. Make sure it exists for local development.")
+		}
 	}
 }
 
