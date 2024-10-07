@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version: '1.23.1' 
         
@@ -39,7 +39,7 @@ jobs:
         go tool cover -html=coverage.out -o coverage.html
 
     - name: Archive code coverage results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: code-coverage-report
         path: src/backend/internal/handlers/coverage.html
@@ -52,21 +52,25 @@ jobs:
         echo "COVERAGE=$COVERAGE" >> $GITHUB_ENV
 
     - name: Create Coverage Badge
-      uses: schneegans/dynamic-badges-action@v1.6.0
-      with:
-        auth: ${{ secrets.GIST_SECRET }}
-        gistID: 44e7725b61d78d612fa0ee53b3437c78
-        filename: go-coverage.json
-        label: Coverage
-        message: ${{ env.COVERAGE }}
-        color: '#3C1'
+      run: |
+        COVERAGE="${{ env.COVERAGE }}"
+        COLOR=$(awk -v cov="${COVERAGE%\%}" 'BEGIN { if (cov >= 80) print "brightgreen"; else if (cov >= 70) print "green"; else if (cov >= 60) print "yellowgreen"; else if (cov >= 50) print "yellow"; else if (cov >= 40) print "orange"; else print "red" }')
+        JSON="{\"schemaVersion\": 1, \"label\": \"coverage\", \"message\": \"$COVERAGE\", \"color\": \"$COLOR\"}"
+        echo "$JSON" > coverage-badge.json
+        GIST_CONTENT=$(jq -Rs . < coverage-badge.json)
+        curl -X PATCH \
+          -H "Authorization: token ${{ secrets.GIST_SECRET }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Content-Type: application/json" \
+          -d "{\"files\": {\"go-coverage.json\": {\"content\": $GIST_CONTENT}}}" \
+          https://api.github.com/gists/44e7725b61d78d612fa0ee53b3437c78
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      continue-on-error: true
 
-    - name: Debug Badge Creation
-      if: failure()
+    - name: Verify Gist Update
       run: |
-        echo "Coverage: ${{ env.COVERAGE }}"
-        echo "Gist ID: 44e7725b61d78d612fa0ee53b3437c78"
-        echo "Filename: go-coverage.json"
+        sleep 5  # Give GitHub some time to update
+        curl -H "Authorization: token ${{ secrets.GIST_SECRET }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/gists/44e7725b61d78d612fa0ee53b3437c78
+ 
