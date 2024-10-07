@@ -9,18 +9,18 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
+
 
 	"github.com/joho/godotenv"
 )
 
 func init() {
-	// Load .env file only if not in a CI environment
 	if os.Getenv("CI") != "true" {
-		envPath := filepath.Join("..", "..", ".env")
-		err := godotenv.Load(envPath)
+		err := godotenv.Load(".env")
 		if err != nil {
-			log.Printf("No .env file found or error loading it. Make sure it exists for local development.")
+			log.Printf("No .env file found. Make sure it exists for local development.")
+		} else {
+			log.Printf("Loaded .env file")
 		}
 	}
 }
