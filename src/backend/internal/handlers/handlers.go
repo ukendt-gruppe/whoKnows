@@ -1,3 +1,5 @@
+// File: src/backend/internal/handlers/handlers.go
+
 package handlers
 
 import (
@@ -13,7 +15,30 @@ import (
 	
 )
 
-var templates = template.Must(template.ParseGlob("../frontend/templates/*.html"))
+var templates *template.Template
+
+func GetTemplates() *template.Template {
+	return templates
+}
+
+func SetTemplates(t *template.Template) {
+	templates = t
+}
+
+func InitTemplates(pattern string) error {
+    var err error
+    templates, err = template.ParseGlob(pattern)
+    return err
+}
+
+func init() {
+	// This will be overridden in tests
+	err := InitTemplates("../frontend/templates/*.html")
+	if err != nil {
+			log.Printf("Warning: Failed to parse templates: %v", err)
+	}
+}
+
 
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value("session").(*sessions.Session)
