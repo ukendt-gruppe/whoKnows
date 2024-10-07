@@ -24,12 +24,12 @@ jobs:
         
     - name: Install dependencies
       run: |
-        cd src/backend/internal/handlers
+        cd src/backend
         go mod download
 
     - name: Run tests with coverage
       run: |
-        cd src/backend/handlers
+        cd src/backend/internal/handlers
         go test -v -coverprofile=coverage.out ./...
         go tool cover -func=coverage.out
 
