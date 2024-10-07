@@ -9,7 +9,19 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+
+	"github.com/joho/godotenv"
 )
+
+func init() {
+	// Attempt to load .env file
+	envPath := filepath.Join("..", "..", ".env")
+	err := godotenv.Load(envPath)
+	if err != nil {
+		log.Printf("No .env file found or error loading it. This is fine in production environments.")
+	}
+}
 
 type WeatherData struct {
 	Main struct {
