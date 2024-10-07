@@ -62,11 +62,9 @@ jobs:
         color: '#3C1'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      continue-on-error: true
 
-    - name: Debug Badge Creation
-      if: failure()
+    - name: Debug Coverage Information
       run: |
-        echo "Coverage: ${{ env.COVERAGE }}"
-        echo "Gist ID: 44e7725b61d78d612fa0ee53b3437c78"
-        echo "Filename: go-coverage.json"
+        echo "COVERAGE: ${{ env.COVERAGE }}"
+        echo "Gist content:"
+        curl -H "Authorization: token ${{ secrets.GIST_SECRET }}" https://api.github.com/gists/44e7725b61d78d612fa0ee53b3437c78
