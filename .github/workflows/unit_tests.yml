@@ -29,24 +29,24 @@ jobs:
 
     - name: Run tests with coverage
       run: |
-        cd src/backend
-        go test -v -coverprofile=coverage.out ./...
+        cd src/backend/internal/handlers
+        go test -v -coverprofile=coverage.out .
         go tool cover -func=coverage.out
 
     - name: Generate coverage report
       run: |
-        cd src/backend
+        cd src/backend/internal/handlers
         go tool cover -html=coverage.out -o coverage.html
 
     - name: Archive code coverage results
       uses: actions/upload-artifact@v3
       with:
         name: code-coverage-report
-        path: src/backend/coverage.html
+        path: src/backend/internal/handlers/coverage.html
 
     - name: Display coverage percentage
       run: |
-        cd src/backend
+        cd src/backend/internal/handlers
         COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}')
         echo "Total coverage: $COVERAGE"
         echo "COVERAGE=$COVERAGE" >> $GITHUB_ENV
