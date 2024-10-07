@@ -10,7 +10,7 @@ import (
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
 )
 
-var templates = template.Must(template.ParseGlob("./frontend/templates/*.html"))
+var templates = template.Must(template.ParseGlob("../frontend/templates/*.html"))
 
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value("session").(*sessions.Session)
