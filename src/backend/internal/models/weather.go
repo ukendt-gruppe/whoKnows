@@ -1,6 +1,6 @@
-// File: src/backend/internal/weather/weather.go
+// File: src/backend/internal/models/weather.go
 
-package weather
+package models
 
 import (
 	"encoding/json"

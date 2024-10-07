@@ -10,7 +10,6 @@ import (
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/models"
-	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/weather"
 	
 )
 
@@ -178,7 +177,7 @@ func AboutHandler(w http.ResponseWriter, r *http.Request) {
 func WeatherHandler(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value("session").(*sessions.Session)
 
-	weatherData, err := weather.FetchWeather("Copenhagen")
+	weatherData, err := models.FetchWeather("Copenhagen")
 	if err != nil {
 		log.Printf("Error fetching weather data: %v", err)
 		http.Error(w, "Error fetching weather data", http.StatusInternalServerError)
