@@ -24,7 +24,7 @@ jobs:
         
     - name: Install dependencies
       run: |
-        cd src/backend
+        cd src/backend/internal/handlers
         go mod download
 
     - name: Run tests with coverage
