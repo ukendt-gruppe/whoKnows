@@ -1,0 +1,45 @@
+name: Integration Tests
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+  schedule:
+    - cron: '0 2 * * 1'  # Run every Monday at 2 AM
+
+jobs:
+  check-weather-api:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.23.1
+
+    - name: Install dependencies
+      run: |
+        cd src/backend
+        go mod download
+
+    - name: Run Weather API Integration Test
+      run: |
+        echo "API Key length: ${#WEATHER_API_KEY}"
+        cd src/backend
+        go test -v ./tests/integration -run TestWeatherAPIIntegration
+      env:
+        WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+        CI: true
+
+    # - name: Run All Integration Tests
+    #   if: always()
+    #   run: |
+    #     cd src/backend
+    #     go test -v ./tests/integration
+    #   env:
+    #     WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+    #     CI: true
