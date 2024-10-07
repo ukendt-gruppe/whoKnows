@@ -1,4 +1,4 @@
-![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/simonformann/44e7725b61d78d612fa0ee53b3437c78/raw/go-coverage.json)
+![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/svdf18/44e7725b61d78d612fa0ee53b3437c78/raw/go-coverage.json)
 
 # Whoknows Variations
 
