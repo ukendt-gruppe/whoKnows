@@ -1,3 +1,5 @@
+![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/simonformann/44e7725b61d78d612fa0ee53b3437c78/raw/go-coverage.json)
+
 # Whoknows Variations
 
 This is the Whoknows variations repository. It is not meant for production as it contains several security vulnerabilities and problematic parts on purpose. 
