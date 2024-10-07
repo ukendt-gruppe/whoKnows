@@ -52,11 +52,21 @@ jobs:
         echo "COVERAGE=$COVERAGE" >> $GITHUB_ENV
 
     - name: Create Coverage Badge
-      run: |
-        COVERAGE=$(echo $COVERAGE | sed 's/%//')
-        COLOR=$(awk -v cov="$COVERAGE" 'BEGIN { if (cov >= 80) print "brightgreen"; else if (cov >= 70) print "green"; else if (cov >= 60) print "yellowgreen"; else if (cov >= 50) print "yellow"; else if (cov >= 40) print "orange"; else print "red" }')
-        JSON="{\"schemaVersion\": 1, \"label\": \"coverage\", \"message\": \"$COVERAGE%\", \"color\": \"$COLOR\"}"
-        echo "$JSON" > coverage-badge.json
-        gh gist edit 44e7725b61d78d612fa0ee53b3437c78 --add coverage-badge.json
+      uses: schneegans/dynamic-badges-action@v1.6.0
+      with:
+        auth: ${{ secrets.GIST_SECRET }}
+        gistID: 44e7725b61d78d612fa0ee53b3437c78
+        filename: go-coverage.json
+        label: Coverage
+        message: ${{ env.COVERAGE }}
+        color: '#3C1'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      continue-on-error: true
+
+    - name: Debug Badge Creation
+      if: failure()
+      run: |
+        echo "Coverage: ${{ env.COVERAGE }}"
+        echo "Gist ID: 44e7725b61d78d612fa0ee53b3437c78"
+        echo "Filename: go-coverage.json"
