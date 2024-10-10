@@ -1,9 +1,13 @@
+// File: src/backend/internal/handlers/api.go
+
+
 package handlers
 
 import (
 	"net/http"
 
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
+	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/models"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
 )
 
@@ -54,16 +58,25 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := SearchResponse{Data: searchResults}
-	utils.JSONResponse(w, http.StatusOK, response)	// Ensure status 200
+	utils.JSONResponse(w, http.StatusOK, response) // Ensure status 200
 }
 
 // Weather handles the /api/weather endpoint
 func Weather(w http.ResponseWriter, r *http.Request) {
-	weatherData := map[string]interface{}{
-		"temperature": 14,
-		"condition":   "Rainy",
+	weatherData, err := models.FetchWeather("Copenhagen")
+	if err != nil {
+		http.Error(w, "Error fetching weather data", http.StatusInternalServerError)
+		return
 	}
-	response := StandardResponse{Data: weatherData}
+
+	response := utils.StandardResponse{
+		Data: map[string]interface{}{
+			"temperature": weatherData.Main.Temp,
+			"condition":   weatherData.Weather[0].Main,
+			"description": weatherData.Weather[0].Description,
+			"location":    weatherData.Name,
+		},
+	}
 	utils.JSONResponse(w, http.StatusOK, response)
 }
 
@@ -84,18 +97,18 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	if username == "" || password == "" {
-			utils.JSONResponse(w, http.StatusUnprocessableEntity, RequestValidationError{
-					StatusCode: http.StatusUnprocessableEntity,	// Return 422 for validation error
-					Message:    "All fields are required",
-			})
-			return
+		utils.JSONResponse(w, http.StatusUnprocessableEntity, RequestValidationError{
+			StatusCode: http.StatusUnprocessableEntity, // Return 422 for validation error
+			Message:    "All fields are required",
+		})
+		return
 	}
 
 	// Registration logic here
 
 	response := AuthResponse{
-			StatusCode: http.StatusOK,
-			Message:    "User registered successfully",
+		StatusCode: http.StatusOK,
+		Message:    "User registered successfully",
 	}
 	utils.JSONResponse(w, http.StatusOK, response)
 }
@@ -117,35 +130,35 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	if username == "" || password == "" {
-			utils.JSONResponse(w, http.StatusUnprocessableEntity, RequestValidationError{
-					StatusCode: http.StatusUnprocessableEntity,	// Return 422 for missing fields
-					Message:    "Username and password are required",
-			})
-			return
+		utils.JSONResponse(w, http.StatusUnprocessableEntity, RequestValidationError{
+			StatusCode: http.StatusUnprocessableEntity, // Return 422 for missing fields
+			Message:    "Username and password are required",
+		})
+		return
 	}
 
 	// Implement authentication logic here
 	// If the credentials are correct, return the success response
 	if username != "" && password != "" {
-			response := AuthResponse{
-					StatusCode: http.StatusOK,		// Ensure status 200
-					Message:    "Login successful",
-			}
-			utils.JSONResponse(w, http.StatusOK, response)
+		response := AuthResponse{
+			StatusCode: http.StatusOK, // Ensure status 200
+			Message:    "Login successful",
+		}
+		utils.JSONResponse(w, http.StatusOK, response)
 	} else {
-			response := AuthResponse{
-					StatusCode: http.StatusUnauthorized, // Return 401 for invalid login
-					Message:    "Invalid username or password",
-			}
-			utils.JSONResponse(w, http.StatusUnauthorized, response)
+		response := AuthResponse{
+			StatusCode: http.StatusUnauthorized, // Return 401 for invalid login
+			Message:    "Invalid username or password",
+		}
+		utils.JSONResponse(w, http.StatusUnauthorized, response)
 	}
 }
 
 // Logout handles the /api/logout endpoint
 func Logout(w http.ResponseWriter, r *http.Request) {
 	response := AuthResponse{
-			StatusCode: http.StatusOK,
-			Message:    "Logout successful",
+		StatusCode: http.StatusOK,
+		Message:    "Logout successful",
 	}
 	utils.JSONResponse(w, http.StatusOK, response)
 }

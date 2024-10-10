@@ -1,3 +1,5 @@
+// File src/backend/main.go:
+
 package main
 
 import (
@@ -6,6 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+    "github.com/joho/godotenv"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/handlers"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/middleware"
@@ -28,6 +31,7 @@ func init() {
         MaxAge:   86400 * 7, // 7 days
         HttpOnly: true,
     }
+    godotenv.Load()
 }
 
 func main() {
