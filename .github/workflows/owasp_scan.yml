@@ -1,0 +1,69 @@
+name: OWASP ZAP Security Scan
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+  issues: write
+  security-events: write
+
+jobs:
+  owasp-zap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'  # Match your Dockerfile's Go version
+          
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc musl-dev sqlite3
+          go mod download
+        working-directory: src/backend
+
+      - name: Build application
+        run: |
+          CGO_ENABLED=1 GOOS=linux go build -o whoknows
+        working-directory: src/backend
+
+      - name: Start the application
+        run: |
+          ./whoknows &
+          echo $! > ./pid.file
+          # Wait for the port to be available
+          timeout 30 bash -c 'while ! nc -z localhost 8080; do sleep 1; done'
+        working-directory: src/backend
+
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.10.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target: 'http://localhost:8080'
+          cmd_options: '-a'
+          allow_issue_writing: true
+          issue_title: 'OWASP ZAP Security Report'
+          fail_action: false  # Don't fail the build if vulnerabilities are found
+
+      - name: Upload ZAP Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: zap-scan-report
+          path: |
+            zap-scan.html
+            zap-scan.json
+
+      - name: Cleanup
+        if: always()  # Run this step even if previous steps fail
+        run: |
+          if [ -f ./pid.file ]; then
+            kill $(cat ./pid.file) || true
+          fi
+        working-directory: src/backend
