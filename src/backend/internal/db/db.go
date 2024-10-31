@@ -2,11 +2,11 @@ package db
 
 import (
 	"database/sql"
+	"encoding/gob"
 	"errors"
 	"fmt"
 	"log"
 	"os"
-	"encoding/gob"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
@@ -128,6 +128,21 @@ func GetUser(identifier interface{}) (*User, error) {
 	return &user, nil
 }
 
+// GetUserByEmail checks if a user exists with the given email
+func GetUserByEmail(email string) (*User, error) {
+	var user User
+	err := DB.QueryRow("SELECT id, username, email, password FROM users WHERE email = ?", email).Scan(
+		&user.ID, &user.Username, &user.Email, &user.Password)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
 // CreateUser creates a new user in the database.
 func CreateUser(username, email, password string) error {
 	hashedPassword, err := utils.HashPassword(password)
@@ -142,12 +157,12 @@ func CreateUser(username, email, password string) error {
 
 // User represents a user in the database.
 type User struct {
-  ID       int
-  Username string
-  Email    string
-  Password string
+	ID       int
+	Username string
+	Email    string
+	Password string
 }
 
 func init() {
-  gob.Register(&User{})
+	gob.Register(&User{})
 }
