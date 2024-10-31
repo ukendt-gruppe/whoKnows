@@ -1,6 +1,5 @@
 // File: src/backend/internal/handlers/api.go
 
-
 package handlers
 
 import (
@@ -137,7 +136,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Implement authentication logic here
+	// Implement authentication logic here!
 	// If the credentials are correct, return the success response
 	if username != "" && password != "" {
 		response := AuthResponse{
