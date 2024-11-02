@@ -1,0 +1,28 @@
+name: Continuous Delivery
+
+on:
+  push:
+    branches: [ feature/cd ]  # or your default branch
+  pull_request:
+    branches: [ feature/cd ]
+  workflow_dispatch:
+
+env:
+  CR_PAT: ${{ secrets.CR_PAT }}
+  DOCKER_GITHUB_USERNAME: ${{ secrets.DOCKER_GITHUB_USERNAME }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Out Repository
+        uses: actions/checkout@v3
+
+      - name: Log in to GitHub Container Registry
+        run: echo ${{ env.CR_PAT }} | docker login ghcr.io -u ${{ env.DOCKER_GITHUB_USERNAME }} --password-stdin
+
+      - name: Build and Push Docker Images
+        working-directory: ./src
+        run: |
+          docker compose -f docker-compose.prod.yml build
+          docker compose -f docker-compose.prod.yml push 
