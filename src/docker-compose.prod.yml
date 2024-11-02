@@ -1,6 +1,6 @@
 services:
   whoknows_go:
-    image: ghcr.io/ukendt-gruppe/whoKnows_server:latest
+    image: ghcr.io/ukendt-gruppe/whoknows_server:latest
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
@@ -10,7 +10,7 @@ services:
       - my_network
 
   whoknows_nginx:
-    image: ghcr.io/ukendt-gruppe/whoKnows_nginx:latest
+    image: ghcr.io/ukendt-gruppe/whoknows_nginx:latest
     build:
       context: ./network
       dockerfile: Dockerfile
