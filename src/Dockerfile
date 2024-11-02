@@ -2,7 +2,7 @@
 FROM golang:1.23.1-alpine AS build
 
 # Install build dependencies
-RUN apk add --no-cache gcc musl-dev
+RUN apk add --no-cache gcc=12.2.1_git20220924-r10 musl-dev=1.2.4-r2
 
 # Set the working directory for the app
 WORKDIR /app
@@ -19,11 +19,11 @@ COPY frontend/ ./frontend/
 # Build the app with CGO enabled
 RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -o whoknows .
 
-# Create an image for the app
-FROM alpine:latest
+# Create an image for the app - using specific Alpine version
+FROM alpine:3.19.1
 
 # Install runtime dependencies
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates=20230506-r0
 
 # Set the working directory for the runtime
 WORKDIR /root/
