@@ -52,11 +52,24 @@ jobs:
 
       - name: Transfer files to server
         run: |
-          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST 'mkdir -p frontend/templates internal/db'
+          # Create necessary directories on server
+          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
+            mkdir -p frontend/templates && \
+            mkdir -p internal/db && \
+            rm -f docker-compose.yml .env
+          '
+          
+          # Transfer files
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no .env $SSH_USER@$SSH_HOST:.env
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.server.yml $SSH_USER@$SSH_HOST:docker-compose.yml
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/backend/internal/db/schema.sql $SSH_USER@$SSH_HOST:internal/db/
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:frontend/templates/
+          
+          # Verify files exist
+          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
+            echo "Checking transferred files:" && \
+            ls -la .env docker-compose.yml internal/db/schema.sql frontend/templates/
+          '
       
       - name: Deploy to server
         run: |
