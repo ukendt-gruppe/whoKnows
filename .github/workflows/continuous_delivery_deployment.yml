@@ -57,7 +57,7 @@ jobs:
 
       - name: Deploy to server
         run: |
-          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST << "EOF"
-            docker compose pull
+          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
+            docker compose pull && \
             docker compose up -d
-          EOF 
+          "
