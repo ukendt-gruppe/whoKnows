@@ -3,6 +3,9 @@ services:
     image: ghcr.io/ukendt-gruppe/whoknows_server:latest
     env_file:
       - .env
+    volumes:
+      - ./frontend:/app/frontend
+      - ./internal:/app/internal
     ports:
       - "8080:8080"
     networks:

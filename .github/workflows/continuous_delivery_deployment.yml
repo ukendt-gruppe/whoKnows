@@ -52,9 +52,12 @@ jobs:
 
       - name: Transfer files to server
         run: |
+          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST 'mkdir -p frontend/templates internal/db'
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no .env $SSH_USER@$SSH_HOST:.env
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.server.yml $SSH_USER@$SSH_HOST:docker-compose.yml
-
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/backend/internal/db/schema.sql $SSH_USER@$SSH_HOST:internal/db/
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:frontend/templates/
+      
       - name: Deploy to server
         run: |
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
