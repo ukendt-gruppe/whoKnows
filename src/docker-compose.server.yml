@@ -4,8 +4,8 @@ services:
     env_file:
       - .env
     volumes:
-      - ./frontend/templates:/app/frontend/templates
-      - ./internal/db:/app/internal/db
+      - ./frontend:/root/frontend
+      - ./internal:/root/internal
     ports:
       - "8080:8080"
     networks:
