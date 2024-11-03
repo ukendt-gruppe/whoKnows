@@ -25,15 +25,33 @@ func SetTemplates(t *template.Template) {
 }
 
 func InitTemplates(pattern string) error {
-	var err error
-	templates, err = template.ParseGlob(pattern)
-	return err
+	// Try multiple possible template locations
+	patterns := []string{
+		"frontend/templates/*.html",    // For production
+		"../frontend/templates/*.html", // For local development
+	}
+
+	var templateErr error
+	for _, p := range patterns {
+		log.Printf("Trying template pattern: %s", p)
+		t, err := template.ParseGlob(p)
+		if err == nil {
+			templates = t
+			log.Printf("Successfully loaded templates from: %s", p)
+			return nil
+		}
+		templateErr = err
+	}
+
+	// If we get here, no patterns worked
+	log.Printf("Failed to load templates from any location. Last error: %v", templateErr)
+	return templateErr
 }
 
 func init() {
 	// This will be overridden in tests
-	err := InitTemplates("../frontend/templates/*.html")
-	if err != nil {
+	if err := InitTemplates(""); // pattern is ignored now
+	err != nil {
 		log.Printf("Warning: Failed to parse templates: %v", err)
 	}
 }
