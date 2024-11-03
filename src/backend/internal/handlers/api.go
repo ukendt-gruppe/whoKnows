@@ -12,7 +12,7 @@ import (
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
 )
 
-// SearchResponse represents the response for the search API
+// SearchResponse represents the response for the search APIss
 type SearchResponse struct {
 	Data []map[string]interface{} `json:"data"`
 }
