@@ -16,6 +16,7 @@ services:
     image: ghcr.io/ukendt-gruppe/whoknows_nginx:latest
     volumes:
       - ./network/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend/static:/usr/share/nginx/html/static:ro
     ports:
       - "80:80"
     depends_on:
