@@ -3,7 +3,9 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/models"
@@ -160,4 +162,14 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		Message:    "Logout successful",
 	}
 	utils.JSONResponse(w, http.StatusOK, response)
+}
+
+func Greeting(w http.ResponseWriter, r *http.Request) {
+	greeting := os.Getenv("ENV_GREETING")
+	log.Printf("Current ENV_GREETING value: %q", greeting) // Debug line
+
+	if greeting == "" {
+		greeting = "No greeting set in environment"
+	}
+	w.Write([]byte(greeting))
 }

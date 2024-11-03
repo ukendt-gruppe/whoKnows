@@ -1,0 +1,22 @@
+services:
+  whoknows_go:
+    image: ghcr.io/ukendt-gruppe/whoknows_server:latest
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    networks:
+      - my_network
+
+  whoknows_nginx:
+    image: ghcr.io/ukendt-gruppe/whoknows_nginx:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - whoknows_go
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge
