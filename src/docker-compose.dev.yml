@@ -1,20 +1,20 @@
 version: '3.8'
 
 services:
-  whoknows_go:  # Changed from whoknows_flask
+  whoknows_go:  
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    image: ghcr.io/who-knows-inc/whoknows_variations_server:latest
+    image: ghcr.io/ukendt-gruppe/whoknows_server:latest
     env_file:
       - backend/.env
     ports:
       - "8080:8080"
     volumes:
-      - ./backend:/app  # Changed path to match our Dockerfile.dev WORKDIR
-      - ./frontend:/frontend  # Add frontend volume for templates
+      - ./backend:/app  
+      - ./frontend:/frontend  
     environment:
-      - GO_ENV=development  # Changed from FLASK_ENV
+      - GO_ENV=development  
     networks:
       - my_network
 
@@ -22,11 +22,11 @@ services:
     build:
       context: ./network
       dockerfile: Dockerfile
-    image: ghcr.io/who-knows-inc/whoknows_variations_nginx:latest
+    image: ghcr.io/ukendt-gruppe/whoknows_nginx:latest
     ports:
       - "80:80"
     depends_on:
-      - whoknows_go  # Changed from whoknows_flask
+      - whoknows_go
     networks:
       - my_network
 
