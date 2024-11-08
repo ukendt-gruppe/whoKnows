@@ -3,7 +3,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev.deploy
-    image: ghcr.io/ukendt-gruppe/whoknows_server:latest
+    image: ghcr.io/ukendt-gruppe/whoknows_server:dev
     volumes:
       - .:/app
       - ../frontend:/frontend
@@ -17,8 +17,8 @@ services:
   whoknows_nginx:
     build:
       context: ./network
-      dockerfile: Dockerfile.dev
-    image: ghcr.io/ukendt-gruppe/whoknows_nginx:latest
+      dockerfile: Dockerfile.nginx.dev
+    image: ghcr.io/ukendt-gruppe/whoknows_nginx:dev
     ports:
       - "80:80"
       - "443:443"
