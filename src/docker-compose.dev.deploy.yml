@@ -4,8 +4,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile.dev.deploy
     image: ghcr.io/ukendt-gruppe/whoknows_server:latest
-    env_file:
-      - ../.env
     volumes:
       - .:/app
       - ../frontend:/frontend
@@ -19,7 +17,7 @@ services:
   whoknows_nginx:
     build:
       context: ./network
-      dockerfile: Dockerfile.nginx.dev
+      dockerfile: Dockerfile.dev
     image: ghcr.io/ukendt-gruppe/whoknows_nginx:latest
     ports:
       - "80:80"

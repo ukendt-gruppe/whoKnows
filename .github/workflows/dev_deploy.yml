@@ -22,16 +22,6 @@ jobs:
       - name: Log in to GitHub Container Registry
         run: echo ${{ env.CR_PAT }} | docker login ghcr.io -u ${{ env.DOCKER_GITHUB_USERNAME }} --password-stdin
 
-      - name: Create .env file
-        run: |
-          # Create .env in src directory (same level as docker-compose.dev.deploy.yml)
-          cat << EOF > src/.env
-          WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}
-          ENV_GREETING=${{ secrets.ENV_GREETING }}
-          EOF
-          # Verify the file exists
-          ls -la src/.env
-
       - name: Build and Push Docker Images
         run: |
           cd src
@@ -45,56 +35,45 @@ jobs:
           chmod 600 ~/.ssh/ssh_key
           ssh-keyscan -H ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Debug SSH Connection
+      - name: Deploy to Dev Server
         run: |
-          echo "Testing SSH connection..."
-          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "echo 'SSH connection successful'"
-
-      - name: Debug Docker Login
-        run: |
-          echo "Testing Docker login..."
-          docker login ghcr.io -u ${{ env.DOCKER_GITHUB_USERNAME }} --password-stdin <<< ${{ env.CR_PAT }}
-          echo "Docker login successful"
-
-      - name: Transfer files to server
-        run: |
-          echo "Starting file transfer..."
-          # Create necessary directories
-          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
-            mkdir -p ~/app/frontend/templates ~/app/network ~/app/backend && \
-            mkdir -p ~/app/internal/db && \
-            rm -f ~/app/docker-compose.yml ~/app/.env && \
-            echo "Directories created successfully"
-          '
+          ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
+            mkdir -p ~/app/network &&
+            rm -f ~/app/docker-compose.yml
+          "
           
-          # Transfer files with verbose output
-          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no .env $SSH_USER@$SSH_HOST:.env
-          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.dev.deploy.yml $SSH_USER@$SSH_HOST:docker-compose.yml
-          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/backend/internal/db/schema.sql $SSH_USER@$SSH_HOST:internal/db/
-          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:frontend/templates/
-          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.dev.conf $SSH_USER@$SSH_HOST:network/nginx.conf
+          scp -i ~/.ssh/ssh_key src/docker-compose.dev.deploy.yml $SSH_USER@$SSH_HOST:~/app/docker-compose.yml
+          scp -i ~/.ssh/ssh_key src/network/nginx-ssl.dev.conf $SSH_USER@$SSH_HOST:~/app/network/
 
-      - name: Deploy to Development Server
+      - name: Start Services
         run: |
-          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
-            cd ~/app && \
-            docker compose pull && \
+          ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
+            cd ~/app &&
+            docker compose pull &&
             docker compose up -d
           "
 
-      - name: Verify Deployment
+      - name: Verify SSL Setup
         run: |
-          echo "Checking container status..."
-          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
-            docker compose ps
+          echo "Waiting for services to start..."
+          sleep 10
+          
+          echo "Checking HTTP redirect..."
+          ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
+            curl -I -s http://localhost | grep -i 'location: https'
           "
           
-          echo "Checking SSL configuration..."
-          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
-            curl -v -k https://localhost
+          echo "Checking HTTPS connection..."
+          ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
+            curl -k -I https://localhost | grep -i 'HTTP/1.1 200'
+          "
+          
+          echo "Checking SSL certificate..."
+          ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
+            echo | openssl s_client -connect localhost:443 2>/dev/null | openssl x509 -noout -text | grep 'Subject:'
           "
           
           echo "Checking container logs..."
-          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
+          ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
             docker compose logs
           "
