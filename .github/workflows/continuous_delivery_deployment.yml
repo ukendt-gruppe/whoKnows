@@ -54,7 +54,7 @@ jobs:
         run: |
           # Create necessary directories
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
-            mkdir -p frontend/templates network && \
+            mkdir -p frontend/templates frontend/static network && \
             mkdir -p internal/db && \
             rm -f docker-compose.yml .env
           '
@@ -62,14 +62,15 @@ jobs:
           # Transfer files
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no .env $SSH_USER@$SSH_HOST:.env
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.server.yml $SSH_USER@$SSH_HOST:docker-compose.yml
-          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/backend/internal/db/schema.sql $SSH_USER@$SSH_HOST:internal/db/
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/backend/internal/db/whoknows.db $SSH_USER@$SSH_HOST:internal/db/
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:frontend/templates/
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/static/* $SSH_USER@$SSH_HOST:frontend/static/
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx.conf $SSH_USER@$SSH_HOST:network/
           
           # Verify files exist
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
             echo "Checking transferred files:" && \
-            ls -la .env docker-compose.yml internal/db/schema.sql frontend/templates/ network/
+            ls -la .env docker-compose.yml internal/db/whoknows.db frontend/templates/ frontend/static/ network/
           '
       
       - name: Deploy to server
