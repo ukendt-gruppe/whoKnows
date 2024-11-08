@@ -1,0 +1,95 @@
+name: Development SSL Deployment
+
+on:
+  push:
+    branches: [ feature/enablehttps ]
+  workflow_dispatch:
+
+env:
+  CR_PAT: ${{ secrets.CR_PAT }}
+  DOCKER_GITHUB_USERNAME: ${{ secrets.DOCKER_GITHUB_USERNAME }}
+  SSH_USER: ${{ secrets.DEV_SSH_USER }}
+  SSH_HOST: ${{ secrets.DEV_SSH_HOST }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check Out Repository
+        uses: actions/checkout@v3
+
+      - name: Log in to GitHub Container Registry
+        run: echo ${{ env.CR_PAT }} | docker login ghcr.io -u ${{ env.DOCKER_GITHUB_USERNAME }} --password-stdin
+
+      - name: Build and Push Docker Images
+        working-directory: ./src
+        run: |
+          docker compose -f docker-compose.dev.deploy.yml build
+          docker compose -f docker-compose.dev.deploy.yml push
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.DEV_SSH_PRIVATE_KEY }}" > ~/.ssh/ssh_key
+          chmod 600 ~/.ssh/ssh_key
+          ssh-keyscan -H ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create .env file
+        run: |
+          echo "WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}" >> .env
+          echo "ENV_GREETING=${{ secrets.ENV_GREETING }}" >> .env
+
+      - name: Debug SSH Connection
+        run: |
+          echo "Testing SSH connection..."
+          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "echo 'SSH connection successful'"
+
+      - name: Debug Docker Login
+        run: |
+          echo "Testing Docker login..."
+          docker login ghcr.io -u ${{ env.DOCKER_GITHUB_USERNAME }} --password-stdin <<< ${{ env.CR_PAT }}
+          echo "Docker login successful"
+
+      - name: Transfer files to server
+        run: |
+          echo "Starting file transfer..."
+          # Create necessary directories
+          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
+            mkdir -p ~/app/frontend/templates ~/app/network ~/app/backend && \
+            mkdir -p ~/app/internal/db && \
+            rm -f ~/app/docker-compose.yml ~/app/.env && \
+            echo "Directories created successfully"
+          '
+          
+          # Transfer files with verbose output
+          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no .env $SSH_USER@$SSH_HOST:~/app/.env
+          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.dev.deploy.yml $SSH_USER@$SSH_HOST:~/app/docker-compose.yml
+          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/backend/internal/db/schema.sql $SSH_USER@$SSH_HOST:~/app/internal/db/
+          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:~/app/frontend/templates/
+          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.dev.conf $SSH_USER@$SSH_HOST:~/app/network/nginx.conf
+
+      - name: Deploy to Development Server
+        run: |
+          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
+            cd ~/app && \
+            docker compose pull && \
+            docker compose up -d
+          "
+
+      - name: Verify Deployment
+        run: |
+          echo "Checking container status..."
+          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
+            docker compose ps
+          "
+          
+          echo "Checking SSL configuration..."
+          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
+            curl -v -k https://localhost
+          "
+          
+          echo "Checking container logs..."
+          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
+            docker compose logs
+          "

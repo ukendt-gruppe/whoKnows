@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  whoknows_go:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev.deploy
+    image: ghcr.io/ukendt-gruppe/whoknows_server:latest
+    env_file:
+      - backend/.env
+    volumes:
+      - ./backend:/app
+      - ./frontend:/frontend
+    ports:
+      - "8080:8080"
+    environment:
+      - GO_ENV=development
+    networks:
+      - my_network
+
+  whoknows_nginx:
+    build:
+      context: ./network
+      dockerfile: Dockerfile.dev
+    image: ghcr.io/ukendt-gruppe/whoknows_nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - whoknows_go
+    networks:
+      - my_network
+    volumes:
+      - ./network/nginx-ssl.dev.conf:/etc/nginx/nginx.conf:ro
+
+networks:
+  my_network:
+    driver: bridge
