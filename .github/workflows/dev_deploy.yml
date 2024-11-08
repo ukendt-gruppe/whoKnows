@@ -24,16 +24,17 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}" >> .env
-          echo "ENV_GREETING=${{ secrets.ENV_GREETING }}" >> .env
+          # Create .env in src directory (same level as docker-compose.dev.deploy.yml)
+          cat << EOF > src/.env
+          WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}
+          ENV_GREETING=${{ secrets.ENV_GREETING }}
+          EOF
+          # Verify the file exists
+          ls -la src/.env
 
       - name: Build and Push Docker Images
         run: |
           cd src
-          # Debug: List contents to verify paths
-          pwd
-          ls -la
-          ls -la backend/
           docker compose -f docker-compose.dev.deploy.yml build
           docker compose -f docker-compose.dev.deploy.yml push
 

@@ -5,10 +5,10 @@ services:
       dockerfile: Dockerfile.dev.deploy
     image: ghcr.io/ukendt-gruppe/whoknows_server:latest
     env_file:
-      - .env
+      - ../.env
     volumes:
-      - ./frontend:/root/frontend
-      - ./internal:/root/internal
+      - .:/app
+      - ../frontend:/frontend
     ports:
       - "8080:8080"
     environment:
