@@ -66,16 +66,7 @@ jobs:
             curl -I http://localhost | grep -i 'location'
           "
           
-          echo "Checking HTTPS connection (verbose)..."
+          echo "Checking HTTPS connection..."
           ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
-            curl -k -v https://localhost
-            
-            echo 'Checking container status...'
-            docker compose ps
-            
-            echo 'Checking nginx logs...'
-            docker compose logs whoknows_nginx
-            
-            echo 'Checking SSL certificate...'
-            openssl s_client -connect localhost:443 -servername localhost
+            curl -k -I https://localhost
           "

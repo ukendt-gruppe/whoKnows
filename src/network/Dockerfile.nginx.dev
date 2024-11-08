@@ -1,7 +1,11 @@
 FROM nginx:latest
 
-# Install OpenSSL
-RUN apt-get update && apt-get install -y openssl
+# Install networking tools and OpenSSL
+RUN apt-get update && apt-get install -y \
+    iputils-ping \
+    curl \
+    openssl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create SSL directory
 RUN mkdir -p /etc/nginx/ssl
