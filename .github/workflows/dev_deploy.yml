@@ -35,7 +35,7 @@ jobs:
           chmod 600 ~/.ssh/ssh_key
           ssh-keyscan -H ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to Dev Server
+      - name: Create Directories
         run: |
           ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
             sudo mkdir -p ~/app/frontend/templates &&
@@ -44,8 +44,9 @@ jobs:
             sudo mkdir -p ~/app/certbot/www &&
             sudo chown -R $USER:$USER ~/app
           "
-          
-          # Copy all necessary files
+
+      - name: Copy Files
+        run: |
           scp -i ~/.ssh/ssh_key -r frontend/templates/* $SSH_USER@$SSH_HOST:~/app/frontend/templates/
           scp -i ~/.ssh/ssh_key src/docker-compose.dev.deploy.yml $SSH_USER@$SSH_HOST:~/app/docker-compose.yml
           scp -i ~/.ssh/ssh_key -r src/network/nginx-ssl.dev.conf $SSH_USER@$SSH_HOST:~/app/network/
