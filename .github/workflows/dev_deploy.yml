@@ -38,10 +38,11 @@ jobs:
       - name: Deploy to Dev Server
         run: |
           ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
-            mkdir -p ~/app/frontend/templates &&
-            mkdir -p ~/app/network &&
-            mkdir -p ~/app/certbot/conf &&
-            mkdir -p ~/app/certbot/www
+            sudo mkdir -p ~/app/frontend/templates &&
+            sudo mkdir -p ~/app/network &&
+            sudo mkdir -p ~/app/certbot/conf &&
+            sudo mkdir -p ~/app/certbot/www &&
+            sudo chown -R $USER:$USER ~/app
           "
           
           # Copy all necessary files
