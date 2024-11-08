@@ -23,8 +23,8 @@ jobs:
         run: echo ${{ env.CR_PAT }} | docker login ghcr.io -u ${{ env.DOCKER_GITHUB_USERNAME }} --password-stdin
 
       - name: Build and Push Docker Images
-        working-directory: ./src
         run: |
+          cd src
           docker compose -f docker-compose.dev.deploy.yml build
           docker compose -f docker-compose.dev.deploy.yml push
 

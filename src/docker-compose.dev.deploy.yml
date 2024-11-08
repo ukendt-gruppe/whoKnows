@@ -21,7 +21,7 @@ services:
   whoknows_nginx:
     build:
       context: ./network
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.nginx.dev
     image: ghcr.io/ukendt-gruppe/whoknows_nginx:latest
     ports:
       - "80:80"
