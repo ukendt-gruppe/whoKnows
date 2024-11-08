@@ -7,8 +7,8 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/app
-      - ../frontend:/frontend
+      - ./frontend:/root/frontend
+      - ./internal:/root/internal
     ports:
       - "8080:8080"
     environment:

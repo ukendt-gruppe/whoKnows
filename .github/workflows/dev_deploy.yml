@@ -24,14 +24,8 @@ jobs:
 
       - name: Create .env file
         run: |
-          mkdir -p src/backend
-          cat << EOF > src/backend/.env
-          WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}
-          ENV_GREETING=${{ secrets.ENV_GREETING }}
-          EOF
-          # Verify the file exists and has content
-          ls -la src/backend/.env
-          cat src/backend/.env
+          echo "WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}" >> .env
+          echo "ENV_GREETING=${{ secrets.ENV_GREETING }}" >> .env
 
       - name: Build and Push Docker Images
         run: |
@@ -73,11 +67,11 @@ jobs:
           '
           
           # Transfer files with verbose output
-          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no .env $SSH_USER@$SSH_HOST:~/app/.env
-          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.dev.deploy.yml $SSH_USER@$SSH_HOST:~/app/docker-compose.yml
-          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/backend/internal/db/schema.sql $SSH_USER@$SSH_HOST:~/app/internal/db/
-          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:~/app/frontend/templates/
-          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.dev.conf $SSH_USER@$SSH_HOST:~/app/network/nginx.conf
+          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no .env $SSH_USER@$SSH_HOST:.env
+          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.dev.deploy.yml $SSH_USER@$SSH_HOST:docker-compose.yml
+          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/backend/internal/db/schema.sql $SSH_USER@$SSH_HOST:internal/db/
+          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:frontend/templates/
+          scp -v -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.dev.conf $SSH_USER@$SSH_HOST:network/nginx.conf
 
       - name: Deploy to Development Server
         run: |
