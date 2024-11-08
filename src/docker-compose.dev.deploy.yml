@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile.dev.deploy
     image: ghcr.io/ukendt-gruppe/whoknows_server:latest
     env_file:
-      - backend/.env
+      - ./backend/.env
     volumes:
       - ./backend:/app
       - ./frontend:/frontend

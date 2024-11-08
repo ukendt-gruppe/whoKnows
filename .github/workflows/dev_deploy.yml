@@ -37,8 +37,11 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}" >> .env
-          echo "ENV_GREETING=${{ secrets.ENV_GREETING }}" >> .env
+            cd src/backend
+            cat << EOF > .env
+            WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}
+            ENV_GREETING=${{ secrets.ENV_GREETING }}
+            EOF
 
       - name: Debug SSH Connection
         run: |
