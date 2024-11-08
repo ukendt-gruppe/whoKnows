@@ -47,21 +47,21 @@ jobs:
         run: |
           # Create necessary directories
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
-            mkdir -p frontend/templates network certbot/conf certbot/www && \
-            mkdir -p internal/db && \
-            rm -f docker-compose.yml
+            sudo mkdir -p ~/app/frontend/templates ~/app/network ~/app/certbot/conf ~/app/certbot/www ~/app/internal/db && \
+            sudo chown -R $USER:$USER ~/app && \
+            rm -f ~/app/docker-compose.yml
           '
           
           # Transfer files
-          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.dev.deploy.yml $SSH_USER@$SSH_HOST:docker-compose.yml
-          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/backend/internal/db/schema.sql $SSH_USER@$SSH_HOST:internal/db/
-          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:frontend/templates/
-          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.dev.conf $SSH_USER@$SSH_HOST:network/
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.dev.deploy.yml $SSH_USER@$SSH_HOST:~/app/docker-compose.yml
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/backend/internal/db/schema.sql $SSH_USER@$SSH_HOST:~/app/internal/db/
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:~/app/frontend/templates/
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.dev.conf $SSH_USER@$SSH_HOST:~/app/network/
           
           # Verify files exist
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
             echo "Checking transferred files:" && \
-            ls -la docker-compose.yml internal/db/schema.sql frontend/templates/ network/
+            ls -la ~/app/docker-compose.yml ~/app/internal/db/schema.sql ~/app/frontend/templates/ ~/app/network/
           '
       
       - name: Deploy to server
