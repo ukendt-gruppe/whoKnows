@@ -5,8 +5,9 @@ services:
       dockerfile: Dockerfile.dev.deploy
     image: ghcr.io/ukendt-gruppe/whoknows_server:dev
     volumes:
-      - ./backend:/app  # Updated path
-      - ./frontend:/frontend  # Updated path
+      - ./backend:/app:ro
+      - go-mod-cache:/go/pkg/mod
+      - app-tmp:/app/tmp
     ports:
       - "8080:8080"
     environment:
@@ -28,6 +29,10 @@ services:
       - my_network
     volumes:
       - ./network/nginx-ssl.dev.conf:/etc/nginx/nginx.conf:ro
+
+volumes:
+  go-mod-cache:
+  app-tmp:
 
 networks:
   my_network:
