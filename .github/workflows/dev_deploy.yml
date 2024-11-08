@@ -8,13 +8,10 @@ on:
 env:
   CR_PAT: ${{ secrets.CR_PAT }}
   DOCKER_GITHUB_USERNAME: ${{ secrets.DOCKER_GITHUB_USERNAME }}
-  SSH_USER: ${{ secrets.DEV_SSH_USER }}
-  SSH_HOST: ${{ secrets.DEV_SSH_HOST }}
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Check Out Repository
         uses: actions/checkout@v3
@@ -23,42 +20,55 @@ jobs:
         run: echo ${{ env.CR_PAT }} | docker login ghcr.io -u ${{ env.DOCKER_GITHUB_USERNAME }} --password-stdin
 
       - name: Build and Push Docker Images
+        working-directory: ./src
         run: |
-          cd src
           docker compose -f docker-compose.dev.deploy.yml build
           docker compose -f docker-compose.dev.deploy.yml push
 
-      - name: Setup SSH
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    env:
+      SSH_USER: ${{ secrets.DEV_SSH_USER }}
+      SSH_HOST: ${{ secrets.DEV_SSH_HOST }}
+
+    steps:
+      - name: Check Out Repository
+        uses: actions/checkout@v3
+
+      - name: Add SSH key to runner
         run: |
           mkdir -p ~/.ssh/
           echo "${{ secrets.DEV_SSH_PRIVATE_KEY }}" > ~/.ssh/ssh_key
           chmod 600 ~/.ssh/ssh_key
           ssh-keyscan -H ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Create Directories
+      - name: Transfer files to server
         run: |
-          ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
-            sudo mkdir -p ~/app/frontend/templates &&
-            sudo mkdir -p ~/app/network &&
-            sudo mkdir -p ~/app/certbot/conf &&
-            sudo mkdir -p ~/app/certbot/www &&
-            sudo chown -R $USER:$USER ~/app
-          "
-
-      - name: Copy Files
+          # Create necessary directories
+          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
+            mkdir -p frontend/templates network certbot/conf certbot/www && \
+            mkdir -p internal/db && \
+            rm -f docker-compose.yml
+          '
+          
+          # Transfer files
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.dev.deploy.yml $SSH_USER@$SSH_HOST:docker-compose.yml
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/backend/internal/db/schema.sql $SSH_USER@$SSH_HOST:internal/db/
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:frontend/templates/
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.dev.conf $SSH_USER@$SSH_HOST:network/
+          
+          # Verify files exist
+          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
+            echo "Checking transferred files:" && \
+            ls -la docker-compose.yml internal/db/schema.sql frontend/templates/ network/
+          '
+      
+      - name: Deploy to server
         run: |
-          scp -i ~/.ssh/ssh_key -r frontend/templates/* $SSH_USER@$SSH_HOST:~/app/frontend/templates/
-          scp -i ~/.ssh/ssh_key src/docker-compose.dev.deploy.yml $SSH_USER@$SSH_HOST:~/app/docker-compose.yml
-          scp -i ~/.ssh/ssh_key -r src/network/nginx-ssl.dev.conf $SSH_USER@$SSH_HOST:~/app/network/
-
-      - name: Start Services
-        run: |
-          ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
-            cd ~/app &&
-            docker compose down &&
-            docker compose pull &&
-            docker compose up -d &&
-            docker compose ps
+          ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
+            docker compose pull && \
+            docker compose up -d
           "
 
       - name: Verify SSL Setup
@@ -73,5 +83,5 @@ jobs:
           
           echo "Checking HTTPS connection..."
           ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
-            curl -k -I https://localhost
+            curl -k https://localhost
           "
