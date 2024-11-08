@@ -5,9 +5,6 @@ WORKDIR /app
 # Install required dependencies for CGO and SQLite
 RUN apk add --no-cache gcc musl-dev sqlite-dev
 
-# Install development tools
-RUN go install github.com/cosmtrek/air@latest
-
 # Copy go mod files first
 COPY go.mod go.sum ./
 RUN go mod download
@@ -15,8 +12,8 @@ RUN go mod download
 # Copy the rest of the code
 COPY . .
 
-# Create tmp directory for air
-RUN mkdir -p /app/tmp
+# Build the application
+RUN go build -o main .
 
 EXPOSE 8080
 
@@ -24,6 +21,6 @@ EXPOSE 8080
 ENV CGO_ENABLED=1
 ENV GO_ENV=development
 
-# Use air for hot reloading in development
-CMD ["air", "-c", ".air.toml"]
+# Run the compiled binary
+CMD ["./main"]
 
