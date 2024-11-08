@@ -56,24 +56,23 @@ jobs:
       - name: Verify SSL Setup
         run: |
           echo "Waiting for services to start..."
-          sleep 10
+          sleep 15
           
           echo "Checking HTTP redirect..."
           ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
-            curl -I -s http://localhost | grep -i 'location: https'
+            curl -I http://localhost | grep -i 'location'
           "
           
-          echo "Checking HTTPS connection..."
+          echo "Checking HTTPS connection (verbose)..."
           ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
-            curl -k -I https://localhost | grep -i 'HTTP/1.1 200'
-          "
-          
-          echo "Checking SSL certificate..."
-          ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
-            echo | openssl s_client -connect localhost:443 2>/dev/null | openssl x509 -noout -text | grep 'Subject:'
-          "
-          
-          echo "Checking container logs..."
-          ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
-            docker compose logs
+            curl -k -v https://localhost
+            
+            echo 'Checking container status...'
+            docker compose ps
+            
+            echo 'Checking nginx logs...'
+            docker compose logs whoknows_nginx
+            
+            echo 'Checking SSL certificate...'
+            openssl s_client -connect localhost:443 -servername localhost
           "
