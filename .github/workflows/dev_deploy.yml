@@ -42,15 +42,18 @@ jobs:
             rm -f ~/app/docker-compose.yml
           "
           
+          # Copy all necessary files
           scp -i ~/.ssh/ssh_key src/docker-compose.dev.deploy.yml $SSH_USER@$SSH_HOST:~/app/docker-compose.yml
-          scp -i ~/.ssh/ssh_key src/network/nginx-ssl.dev.conf $SSH_USER@$SSH_HOST:~/app/network/
+          scp -i ~/.ssh/ssh_key -r src/network/nginx-ssl.dev.conf $SSH_USER@$SSH_HOST:~/app/network/
 
       - name: Start Services
         run: |
           ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
             cd ~/app &&
-            docker compose pull &&
-            docker compose up -d
+            docker compose down &&  # Stop existing containers
+            docker compose pull &&  # Pull latest images
+            docker compose up -d && # Start containers
+            docker compose ps      # Show container status
           "
 
       - name: Verify SSL Setup

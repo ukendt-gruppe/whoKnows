@@ -5,8 +5,8 @@ services:
       dockerfile: Dockerfile.dev.deploy
     image: ghcr.io/ukendt-gruppe/whoknows_server:dev
     volumes:
-      - .:/app
-      - ../frontend:/frontend
+      - ./backend:/app  # Updated path
+      - ./frontend:/frontend  # Updated path
     ports:
       - "8080:8080"
     environment:
