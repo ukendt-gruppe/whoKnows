@@ -1,21 +1,22 @@
 services:
   whoknows_go:
+    image: ghcr.io/ukendt-gruppe/whoknows_server:dev
     build:
       context: ./backend
       dockerfile: Dockerfile.dev.deploy
-    image: ghcr.io/ukendt-gruppe/whoknows_server:dev
     ports:
       - "8080:8080"
-    environment:
-      - GO_ENV=development
     networks:
       - my_network
+    volumes:
+      - ../frontend/templates:/app/frontend/templates:ro  # Mount templates
+      - db-data:/app/internal/db  # Persist database
 
   whoknows_nginx:
+    image: ghcr.io/ukendt-gruppe/whoknows_nginx:dev
     build:
       context: ./network
       dockerfile: Dockerfile.nginx.dev
-    image: ghcr.io/ukendt-gruppe/whoknows_nginx:dev
     ports:
       - "80:80"
       - "443:443"
@@ -25,6 +26,11 @@ services:
       - my_network
     volumes:
       - ./network/nginx-ssl.dev.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+
+volumes:
+  db-data:
 
 networks:
   my_network:

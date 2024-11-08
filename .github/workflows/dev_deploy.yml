@@ -38,11 +38,14 @@ jobs:
       - name: Deploy to Dev Server
         run: |
           ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
+            mkdir -p ~/app/frontend/templates &&
             mkdir -p ~/app/network &&
-            rm -f ~/app/docker-compose.yml
+            mkdir -p ~/app/certbot/conf &&
+            mkdir -p ~/app/certbot/www
           "
           
           # Copy all necessary files
+          scp -i ~/.ssh/ssh_key -r frontend/templates/* $SSH_USER@$SSH_HOST:~/app/frontend/templates/
           scp -i ~/.ssh/ssh_key src/docker-compose.dev.deploy.yml $SSH_USER@$SSH_HOST:~/app/docker-compose.yml
           scp -i ~/.ssh/ssh_key -r src/network/nginx-ssl.dev.conf $SSH_USER@$SSH_HOST:~/app/network/
 
@@ -50,10 +53,10 @@ jobs:
         run: |
           ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
             cd ~/app &&
-            docker compose down &&  # Stop existing containers
-            docker compose pull &&  # Pull latest images
-            docker compose up -d && # Start containers
-            docker compose ps      # Show container status
+            docker compose down &&
+            docker compose pull &&
+            docker compose up -d &&
+            docker compose ps
           "
 
       - name: Verify SSL Setup
@@ -68,5 +71,5 @@ jobs:
           
           echo "Checking HTTPS connection..."
           ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
-            curl -k https://localhost
+            curl -k -I https://localhost
           "
