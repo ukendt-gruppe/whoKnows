@@ -68,5 +68,5 @@ jobs:
           
           echo "Checking HTTPS connection..."
           ssh -i ~/.ssh/ssh_key $SSH_USER@$SSH_HOST "
-            curl -k -I https://localhost
+            curl -k https://localhost
           "
