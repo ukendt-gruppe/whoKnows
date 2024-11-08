@@ -22,9 +22,24 @@ jobs:
       - name: Log in to GitHub Container Registry
         run: echo ${{ env.CR_PAT }} | docker login ghcr.io -u ${{ env.DOCKER_GITHUB_USERNAME }} --password-stdin
 
+      - name: Create .env file
+        run: |
+          mkdir -p src/backend
+          cat << EOF > src/backend/.env
+          WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}
+          ENV_GREETING=${{ secrets.ENV_GREETING }}
+          EOF
+          # Verify the file exists and has content
+          ls -la src/backend/.env
+          cat src/backend/.env
+
       - name: Build and Push Docker Images
         run: |
           cd src
+          # Debug: List contents to verify paths
+          pwd
+          ls -la
+          ls -la backend/
           docker compose -f docker-compose.dev.deploy.yml build
           docker compose -f docker-compose.dev.deploy.yml push
 
@@ -34,14 +49,6 @@ jobs:
           echo "${{ secrets.DEV_SSH_PRIVATE_KEY }}" > ~/.ssh/ssh_key
           chmod 600 ~/.ssh/ssh_key
           ssh-keyscan -H ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Create .env file
-        run: |
-            cd src/backend
-            cat << EOF > .env
-            WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}
-            ENV_GREETING=${{ secrets.ENV_GREETING }}
-            EOF
 
       - name: Debug SSH Connection
         run: |
