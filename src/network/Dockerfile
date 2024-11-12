@@ -6,7 +6,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Create required directories
-RUN mkdir -p /var/www/certbot
+RUN mkdir -p /var/www/certbot /etc/nginx/conf.d
 
 # Copy SSL-ready nginx configuration
 COPY ./nginx-ssl.conf /etc/nginx/conf.d/default.conf

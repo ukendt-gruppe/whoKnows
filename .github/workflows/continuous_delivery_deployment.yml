@@ -65,7 +65,7 @@ jobs:
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.server.yml $SSH_USER@$SSH_HOST:docker-compose.yml
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:frontend/templates/
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/static/* $SSH_USER@$SSH_HOST:frontend/static/
-          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.conf $SSH_USER@$SSH_HOST:network/nginx.conf
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.conf $SSH_USER@$SSH_HOST:network/nginx-ssl.conf
           
           # Verify files exist
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
