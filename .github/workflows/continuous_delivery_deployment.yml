@@ -57,20 +57,20 @@ jobs:
             mkdir -p frontend/templates frontend/static network && \
             mkdir -p internal/db && \
             mkdir -p certbot/www certbot/conf && \
-            rm -f docker-compose.yml .env
+            rm -f docker-compose.yml .env nginx.conf
           '
           
-          # Transfer files
+          # Transfer files with correct permissions
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no .env $SSH_USER@$SSH_HOST:.env
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.server.yml $SSH_USER@$SSH_HOST:docker-compose.yml
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:frontend/templates/
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/static/* $SSH_USER@$SSH_HOST:frontend/static/
-          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.conf $SSH_USER@$SSH_HOST:network/nginx-ssl.conf
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.conf $SSH_USER@$SSH_HOST:network/default.conf
           
-          # Verify files exist
+          # Set correct permissions
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
-            echo "Checking transferred files:" && \
-            ls -la .env docker-compose.yml frontend/templates/ frontend/static/ network/ certbot/
+            chmod 644 network/default.conf && \
+            chmod -R 755 frontend certbot
           '
       
       - name: Deploy to server
