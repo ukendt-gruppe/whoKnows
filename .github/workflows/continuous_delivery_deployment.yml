@@ -54,6 +54,7 @@ jobs:
         run: |
           # Create necessary directories with correct ownership
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
+            sudo rm -rf network/* && \  # Clear existing network directory
             sudo mkdir -p frontend/templates frontend/static network certbot/www certbot/conf internal/db && \
             sudo chown -R $USER:$USER . && \
             sudo chown -R $USER:$USER frontend internal network && \
@@ -65,8 +66,8 @@ jobs:
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.server.yml $SSH_USER@$SSH_HOST:docker-compose.yml
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no -r src/frontend/templates/* $SSH_USER@$SSH_HOST:frontend/templates/
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no -r src/frontend/static/* $SSH_USER@$SSH_HOST:frontend/static/
-          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx.conf $SSH_USER@$SSH_HOST:network/
-          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.conf $SSH_USER@$SSH_HOST:network/
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx.conf $SSH_USER@$SSH_HOST:network/nginx.conf
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.conf $SSH_USER@$SSH_HOST:network/nginx-ssl.conf
           
           # Set correct permissions
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
