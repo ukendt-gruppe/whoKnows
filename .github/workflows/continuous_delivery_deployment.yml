@@ -52,25 +52,27 @@ jobs:
 
       - name: Transfer files to server
         run: |
-          # Create necessary directories
+          # Create necessary directories with correct ownership
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
-            mkdir -p frontend/templates frontend/static network && \
-            mkdir -p internal/db && \
-            mkdir -p certbot/www certbot/conf && \
-            rm -f docker-compose.yml .env nginx.conf
+            sudo mkdir -p frontend/templates frontend/static network && \
+            sudo mkdir -p internal/db && \
+            sudo mkdir -p certbot/www certbot/conf && \
+            sudo chown -R $USER:$USER frontend internal network && \
+            sudo chown -R root:root certbot && \
+            rm -f docker-compose.yml .env
           '
           
-          # Transfer files with correct permissions
+          # Transfer files
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no .env $SSH_USER@$SSH_HOST:.env
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.server.yml $SSH_USER@$SSH_HOST:docker-compose.yml
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:frontend/templates/
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/static/* $SSH_USER@$SSH_HOST:frontend/static/
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.conf $SSH_USER@$SSH_HOST:network/default.conf
           
-          # Set correct permissions
+          # Set correct permissions (excluding certbot directory)
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
             chmod 644 network/default.conf && \
-            chmod -R 755 frontend certbot
+            chmod -R 755 frontend
           '
       
       - name: Deploy to server
