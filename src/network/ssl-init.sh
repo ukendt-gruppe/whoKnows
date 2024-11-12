@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Create webroot directory
+mkdir -p /var/www/certbot
+
 # Wait for nginx to start
 sleep 5
 
@@ -13,15 +16,15 @@ if [ ! -f /etc/letsencrypt/live/monkbusiness.dk/fullchain.pem ]; then
     # Temporarily remove SSL configuration
     rm -f $SSL_CONF
     
-    # Reload nginx to apply changes
-    nginx -s reload
+    # Start nginx in the background
+    nginx
 
     # Get the certificate
     certbot certonly --webroot \
             --webroot-path /var/www/certbot \
             --non-interactive \
             --agree-tos \
-            --email sifo0001@stud.kea.dk \
+            --email monk@monkbusiness.dk \
             -d monkbusiness.dk
 
     # If certificate was obtained successfully, create SSL configuration
@@ -50,10 +53,10 @@ server {
     }
 }
 EOF
-        # Update HTTP server to redirect to HTTPS
-        sed -i 's/proxy_pass/return 301 https:\/\/$host$request_uri;#/' /etc/nginx/nginx.conf
-        
         # Reload nginx to apply SSL configuration
         nginx -s reload
     fi
-fi 
+fi
+
+# Keep nginx running in foreground
+nginx -g 'daemon off;' 
