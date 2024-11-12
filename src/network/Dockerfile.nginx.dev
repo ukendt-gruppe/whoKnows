@@ -1,0 +1,23 @@
+FROM nginx:latest
+
+# Install networking tools and OpenSSL
+RUN apt-get update && apt-get install -y \
+    iputils-ping \
+    curl \
+    openssl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create SSL directory
+RUN mkdir -p /etc/nginx/ssl
+
+# Generate self-signed certificate
+RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/nginx/ssl/nginx-selfsigned.key \
+    -out /etc/nginx/ssl/nginx-selfsigned.crt \
+    -subj "/C=DK/ST=Denmark/L=Copenhagen/O=Development/CN=localhost"
+
+COPY ./nginx-ssl.dev.conf /etc/nginx/nginx.conf
+
+EXPOSE 80 443
+
+CMD ["nginx", "-g", "daemon off;"]

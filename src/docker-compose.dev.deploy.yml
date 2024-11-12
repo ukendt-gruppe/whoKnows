@@ -1,0 +1,37 @@
+services:
+  whoknows_go:
+    image: ghcr.io/ukendt-gruppe/whoknows_server:dev
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev.deploy
+    ports:
+      - "8080:8080"
+    networks:
+      - my_network
+    volumes:
+      - ./frontend/templates:/app/frontend/templates:ro
+      - db-data:/app/internal/db
+
+  whoknows_nginx:
+    image: ghcr.io/ukendt-gruppe/whoknows_nginx:dev
+    build:
+      context: ./network
+      dockerfile: Dockerfile.nginx.dev
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - whoknows_go
+    networks:
+      - my_network
+    volumes:
+      - ./network/nginx-ssl.dev.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+
+volumes:
+  db-data:
+
+networks:
+  my_network:
+    driver: bridge
