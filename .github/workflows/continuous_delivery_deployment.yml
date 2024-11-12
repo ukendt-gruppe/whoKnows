@@ -67,11 +67,12 @@ jobs:
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.server.yml $SSH_USER@$SSH_HOST:docker-compose.yml
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:frontend/templates/
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/static/* $SSH_USER@$SSH_HOST:frontend/static/
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx.conf $SSH_USER@$SSH_HOST:network/nginx.conf
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.conf $SSH_USER@$SSH_HOST:network/default.conf
           
-          # Set correct permissions (excluding certbot directory)
+          # Set correct permissions
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
-            chmod 644 network/default.conf && \
+            chmod 644 network/nginx.conf network/default.conf && \
             chmod -R 755 frontend
           '
       

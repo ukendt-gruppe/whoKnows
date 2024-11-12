@@ -8,7 +8,8 @@ RUN apt-get update && \
 # Create required directories
 RUN mkdir -p /var/www/certbot /etc/nginx/conf.d
 
-# Copy SSL-ready nginx configuration
+# Copy nginx configurations
+COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./nginx-ssl.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80 443
