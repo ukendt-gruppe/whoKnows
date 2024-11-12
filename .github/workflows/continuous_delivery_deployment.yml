@@ -68,12 +68,11 @@ jobs:
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:frontend/templates/
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/static/* $SSH_USER@$SSH_HOST:frontend/static/
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx.conf $SSH_USER@$SSH_HOST:network/nginx.conf
-          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-init.conf $SSH_USER@$SSH_HOST:network/nginx-init.conf
-          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.conf $SSH_USER@$SSH_HOST:network/ssl.conf.disabled
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.conf $SSH_USER@$SSH_HOST:network/nginx-ssl.conf
           
           # Set correct permissions
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
-            chmod 644 network/nginx.conf network/nginx-init.conf network/ssl.conf.disabled && \
+            chmod 644 network/nginx.conf network/nginx-ssl.conf && \
             chmod -R 755 frontend
           '
       

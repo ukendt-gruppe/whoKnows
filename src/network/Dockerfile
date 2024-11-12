@@ -10,8 +10,7 @@ RUN mkdir -p /var/www/certbot /etc/nginx/conf.d
 
 # Copy nginx configurations
 COPY ./nginx.conf /etc/nginx/nginx.conf
-COPY ./nginx-init.conf /etc/nginx/conf.d/default.conf
-COPY ./nginx-ssl.conf /etc/nginx/conf.d/ssl.conf.disabled
+COPY ./nginx-ssl.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80 443
 
