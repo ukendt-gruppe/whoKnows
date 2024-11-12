@@ -5,11 +5,11 @@ RUN apt-get update && \
     apt-get install -y certbot python3-certbot-nginx && \
     rm -rf /var/lib/apt/lists/*
 
-# Create directories for certbot
+# Create required directories
 RUN mkdir -p /var/www/certbot
 
 # Copy SSL-ready nginx configuration
-COPY ./nginx-ssl.conf /etc/nginx/nginx.conf
+COPY ./nginx-ssl.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80 443
 
