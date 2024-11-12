@@ -2,9 +2,9 @@ name: Continuous Delivery and Deployment
 
 on:
   push:
-    branches: [ continuous_deployment ]
+    branches: [ dev ]
   pull_request:
-    branches: [ continuous_deployment ]
+    branches: [ dev ]
   workflow_dispatch:
 
 env:
@@ -56,6 +56,7 @@ jobs:
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
             mkdir -p frontend/templates frontend/static network && \
             mkdir -p internal/db && \
+            mkdir -p certbot/www certbot/conf && \
             rm -f docker-compose.yml .env
           '
           
@@ -64,12 +65,12 @@ jobs:
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/docker-compose.server.yml $SSH_USER@$SSH_HOST:docker-compose.yml
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/templates/* $SSH_USER@$SSH_HOST:frontend/templates/
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/static/* $SSH_USER@$SSH_HOST:frontend/static/
-          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx.conf $SSH_USER@$SSH_HOST:network/
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx-ssl.conf $SSH_USER@$SSH_HOST:network/nginx.conf
           
           # Verify files exist
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
             echo "Checking transferred files:" && \
-            ls -la .env docker-compose.yml frontend/templates/ frontend/static/ network/
+            ls -la .env docker-compose.yml frontend/templates/ frontend/static/ network/ certbot/
           '
       
       - name: Deploy to server

@@ -1,6 +1,15 @@
 FROM nginx:latest
 
-COPY ./nginx.conf /etc/nginx/nginx.conf
+# Install certbot and its nginx plugin
+RUN apt-get update && \
+    apt-get install -y certbot python3-certbot-nginx && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create directories for certbot
+RUN mkdir -p /var/www/certbot
+
+# Copy SSL-ready nginx configuration
+COPY ./nginx-ssl.conf /etc/nginx/nginx.conf
 
 EXPOSE 80 443
 
