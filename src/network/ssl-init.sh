@@ -13,12 +13,6 @@ touch $SSL_CONF
 if [ ! -f /etc/letsencrypt/live/monkbusiness.dk/fullchain.pem ]; then
     echo "No SSL certificate found. Obtaining one..."
     
-    # Temporarily remove SSL configuration
-    rm -f $SSL_CONF
-    
-    # Start nginx in the background
-    nginx
-
     # Get the certificate
     certbot certonly --webroot \
             --webroot-path /var/www/certbot \
@@ -53,10 +47,10 @@ server {
     }
 }
 EOF
-        # Reload nginx to apply SSL configuration
-        nginx -s reload
+        # Update HTTP server to redirect to HTTPS
+        sed -i 's/proxy_pass/return 301 https:\/\/$host$request_uri;#/' /etc/nginx/nginx.conf
     fi
 fi
 
-# Keep nginx running in foreground
-nginx -g 'daemon off;' 
+# Exit the script - let the main nginx process handle everything
+exit 0
