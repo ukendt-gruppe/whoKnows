@@ -21,7 +21,7 @@ if [ ! -f /etc/letsencrypt/live/monkbusiness.dk/fullchain.pem ]; then
             --webroot-path /var/www/certbot \
             --non-interactive \
             --agree-tos \
-            --email your-email@example.com \
+            --email sifo0001@stud.kea.dk \
             -d monkbusiness.dk
 
     # If certificate was obtained successfully, create SSL configuration
