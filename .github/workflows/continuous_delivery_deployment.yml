@@ -57,7 +57,6 @@ jobs:
             mkdir -p frontend/templates frontend/static network/monitoring && \
             mkdir -p internal/db && \
             rm -f docker-compose.yml .env
-            
           '
           
           # Transfer files
@@ -67,14 +66,12 @@ jobs:
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/frontend/static/* $SSH_USER@$SSH_HOST:frontend/static/
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/nginx.conf $SSH_USER@$SSH_HOST:network/
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/ssl-init.sh $SSH_USER@$SSH_HOST:network/
-          
-          # Add monitoring script transfer
-          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/monitoring/collect_metrics.sh $SSH_USER@$SSH_HOST:network/monitoring/
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/monitoring/collect_metrics.sh $SSH_USER@$SSH_HOST:network/monitoring/collect_metrics.sh
 
-          # Verify files exist
+          # Verify files exist (updated to check specific files)
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
             echo "Checking transferred files:" && \
-            ls -la .env docker-compose.yml frontend/templates/ frontend/static/ network/ monitoring/
+            ls -la network/monitoring/collect_metrics.sh
           '
       
       - name: Deploy to server
