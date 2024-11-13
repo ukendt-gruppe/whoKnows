@@ -14,3 +14,10 @@ RUN chmod +x /docker-entrypoint.d/ssl-init.sh
 EXPOSE 80 443
 
 CMD ["nginx", "-g", "daemon off;"]
+
+# Add metrics script and cron
+COPY ./monitoring/collect_metrics.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/collect_metrics.sh && \
+    apt-get update && \
+    apt-get install -y cron && \
+    echo "*/5 * * * * root /usr/local/bin/collect_metrics.sh" >> /etc/crontab
