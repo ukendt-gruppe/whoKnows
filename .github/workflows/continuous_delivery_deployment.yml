@@ -54,7 +54,7 @@ jobs:
         run: |
           # Create necessary directories
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
-            mkdir -p frontend/templates frontend/static network && \
+            mkdir -p frontend/templates frontend/static network/monitoring && \
             mkdir -p internal/db && \
             rm -f docker-compose.yml .env
             
