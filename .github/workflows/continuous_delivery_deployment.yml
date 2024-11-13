@@ -69,7 +69,7 @@ jobs:
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/ssl-init.sh $SSH_USER@$SSH_HOST:network/
           
           # Add monitoring script transfer
-          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/monitoring/collect_metrics.sh $SSH_USER@$SSH_HOST:monitoring/
+          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/monitoring/collect_metrics.sh $SSH_USER@$SSH_HOST:network/monitoring/
 
           # Verify files exist
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
