@@ -2,9 +2,9 @@ name: Continuous Delivery and Deployment
 
 on:
   push:
-    branches: [ monitoring ]
+    branches: [ continuous_deployment ]
   pull_request:
-    branches: [ monitoring ]
+    branches: [ continuous_deployment ]
   workflow_dispatch:
 
 env:
