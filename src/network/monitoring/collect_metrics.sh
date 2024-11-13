@@ -2,21 +2,37 @@
 
 # Create metrics directory if it doesn't exist
 mkdir -p /var/log/metrics
+chmod 755 /var/log/metrics
+
+# Initialize log files if they don't exist
+touch /var/log/metrics/daily_searches.log
+touch /var/log/metrics/daily_users.log
+touch /var/log/metrics/cpu_load.log
+touch /var/log/metrics/disk_usage.log
+
+# Set permissions
+chmod 644 /var/log/metrics/*.log
 
 # Timestamp for the log entries
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
-# Collect CPU load using /proc/loadavg instead of uptime
+# Collect CPU load using /proc/loadavg
 CPU_LOAD=$(cat /proc/loadavg | awk '{print $1,$2,$3}')
 echo "[$TIMESTAMP] $CPU_LOAD" >> /var/log/metrics/cpu_load.log
 
-# Count unique IPs in nginx access log (rough active users estimate)
-UNIQUE_USERS=$(awk '{print $1}' /var/log/nginx/access.log | sort -u | wc -l)
-echo "[$TIMESTAMP] $UNIQUE_USERS" >> /var/log/metrics/daily_users.log
+# Ensure access.log exists and is readable
+if [ -f /var/log/nginx/access.log ]; then
+    # Count unique IPs in nginx access log
+    UNIQUE_USERS=$(awk '{print $1}' /var/log/nginx/access.log | sort -u | wc -l)
+    echo "[$TIMESTAMP] $UNIQUE_USERS" >> /var/log/metrics/daily_users.log
 
-# Count searches (assuming searches are GET requests with '?q=' parameter)
-DAILY_SEARCHES=$(grep "GET /?q=" /var/log/nginx/access.log | wc -l)
-echo "[$TIMESTAMP] $DAILY_SEARCHES" >> /var/log/metrics/daily_searches.log
+    # Count searches
+    DAILY_SEARCHES=$(grep "GET /?q=" /var/log/nginx/access.log | wc -l)
+    echo "[$TIMESTAMP] $DAILY_SEARCHES" >> /var/log/metrics/daily_searches.log
+else
+    echo "[$TIMESTAMP] 0" >> /var/log/metrics/daily_users.log
+    echo "[$TIMESTAMP] 0" >> /var/log/metrics/daily_searches.log
+fi
 
 # Disk usage
 DISK_USAGE=$(df -h / | tail -n1 | awk '{print $5}')
