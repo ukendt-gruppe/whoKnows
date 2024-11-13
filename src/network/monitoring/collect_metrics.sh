@@ -6,8 +6,8 @@ mkdir -p /var/log/metrics
 # Timestamp for the log entries
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
-# Collect CPU load
-CPU_LOAD=$(uptime | awk '{print $8,$9,$10}')
+# Collect CPU load using /proc/loadavg instead of uptime
+CPU_LOAD=$(cat /proc/loadavg | awk '{print $1,$2,$3}')
 echo "[$TIMESTAMP] $CPU_LOAD" >> /var/log/metrics/cpu_load.log
 
 # Count unique IPs in nginx access log (rough active users estimate)
