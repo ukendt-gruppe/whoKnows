@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'whoknows_backend'
+    static_configs:
+      - targets: ['whoknows_backend:8080']

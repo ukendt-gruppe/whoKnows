@@ -35,6 +35,7 @@ func init() {
 		MaxAge:   86400 * 7, // 7 days
 		HttpOnly: true,
 	}
+
 }
 
 func main() {
@@ -59,6 +60,9 @@ func main() {
 	r.HandleFunc("/logout", handlers.LogoutHandler).Methods("GET")
 	r.HandleFunc("/weather", handlers.WeatherHandler).Methods("GET")
 	r.HandleFunc("/greeting", handlers.Greeting).Methods("GET")
+
+	// Prometheus metrics endpoint
+	r.Use(middleware.PrometheusMiddleware)
 
 	// API routes
 	api := r.PathPrefix("/api").Subrouter()
