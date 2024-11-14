@@ -24,7 +24,7 @@ services:
       dockerfile: Dockerfile.nginx
     image: ghcr.io/who-knows-inc/whoknows_variations_nginx:latest
     ports:
-      - "82:82"
+      - "80:80"
     depends_on:
       - whoknows_go # Changed from whoknows_flask
     networks:
