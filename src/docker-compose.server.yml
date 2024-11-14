@@ -28,6 +28,17 @@ services:
     networks:
       - my_network
 
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    expose:
+      - "9090"
+    depends_on:
+      - whoknows_go
+    networks:
+      - my_network
+
 networks:
   my_network:
     driver: bridge
