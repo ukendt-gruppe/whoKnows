@@ -11,7 +11,7 @@ COPY ./ssl-init.sh /docker-entrypoint.d/ssl-init.sh
 
 RUN chmod +x /docker-entrypoint.d/ssl-init.sh
 
-EXPOSE 80 443
+EXPOSE 82 443
 
 CMD ["nginx", "-g", "daemon off;"]
 

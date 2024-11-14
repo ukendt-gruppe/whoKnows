@@ -1,26 +1,30 @@
 {{define "about"}}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>About - Who Knows?</title>
-    <link rel="stylesheet" type="text/css" href="/static/style.css">
-</head>
-<body>
+    <link rel="stylesheet" type="text/css" href="/static/style.css" />
+  </head>
+  <body>
     <div class="page">
-        {{template "navigation" .}}
-        
-        <div class="body">
-            <h1>Our mission</h1>
-            <p>We intend to build the world's best search engine!</p>
+      {{template "navigation" .}}
 
-            <h2>Our team</h2>
-            <img src="/static/monkgroup.png" alt="monk group our team" style="height: 50vh;">
-        </div>
+      <div class="body">
+        <h1>Our mission</h1>
+        <p>We intend to build the world's best search engine!</p>
 
-        {{template "footer" .}}
+        <h2>Our team</h2>
+        <img
+          src="/static/monk_business.webp"
+          alt="monk group our team"
+          style="height: 50vh"
+        />
+      </div>
+
+      {{template "footer" .}}
     </div>
-</body>
+  </body>
 </html>
 {{end}}

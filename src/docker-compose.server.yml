@@ -21,7 +21,7 @@ services:
       - certbot-www:/var/www/certbot
       - metrics_logs:/var/log/metrics
     ports:
-      - "80:80"
+      - "82:82"
       - "443:443"
     depends_on:
       - whoknows_go

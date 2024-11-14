@@ -15,7 +15,7 @@ services:
       context: ./network
       dockerfile: Dockerfile.nginx
     ports:
-      - "80:80"
+      - "82:82"
       - "443:443"
     depends_on:
       - whoknows_go
