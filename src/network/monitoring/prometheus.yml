@@ -3,6 +3,6 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'whoknows_backend'
+  - job_name: 'whoknows_go'
     static_configs:
-      - targets: ['whoknows_backend:8080']
+      - targets: ['whoknows_go:8080']
