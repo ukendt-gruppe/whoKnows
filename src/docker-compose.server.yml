@@ -37,12 +37,10 @@ services:
     depends_on:
       - whoknows_go
     networks:
-      - app-network
+      - my_network
 
 networks:
   my_network:
-    driver: bridge
-  app-network:
     driver: bridge
 
 volumes:
