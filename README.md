@@ -1,29 +1,31 @@
 ![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/svdf18/44e7725b61d78d612fa0ee53b3437c78/raw/go-coverage.json)
 
-# Whoknows Variations
+# Whoknows (Ukendt Gruppe)
 
-This is the Whoknows variations repository. It is not meant for production as it contains several security vulnerabilities and problematic parts on purpose. 
+This is the Ukendt Gruppe edit of Whoknows search engine project
 
 ## How to get started
 
-Each branch is a tutorial in a different topic based on the same Flask application as in the `main` branch. 
+1. Fork the repository to your own account.
 
-One way to follow along is by:
+2. Clone the repository to your local machine.
 
-1. Forking the repository to your own account.
+3. Check out the branch you are interested in (e.g. `git checkout <branch_name>`).
 
-2. Cloning the repository to your local machine.
+4. Branch out
 
-3. Checking out the branch you are interested in (e.g. `git checkout <branch_name>`).
+5. Work on your feature to the project
 
-4. Following the instructions in the README of the branch.
-
-5. You can now push changes to your own repository. 
 
 ## Pull requests
 
-If you have any suggestions or improvements to the tutorials, feel free to open a pull request.
+Feel free to open a pull request:
+
+1. Ensure it works locally 
+
+2. Make pull request to Development branch
+
+3. Await approval
 
 =======
 # whoKnows
-Legacy from DevOps
