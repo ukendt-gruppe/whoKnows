@@ -1,51 +1,45 @@
 {{define "layout"}}
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>¿Who Knows?</title>
-    <link rel="stylesheet" type="text/css" href="/static/style.css">
-</head>
-<body>
+    <link rel="stylesheet" type="text/css" href="/static/style.css" />
+  </head>
+  <body>
     <div class="page">
-        {{template "navigation" .}}
-       
-        <!-- Flash messages section -->
-        {{if .Flashes}}
-        <ul class="flashes">
-            {{range .Flashes}}
-            <li>{{.}}</li>
-            {{end}}
-        </ul>
+      {{template "navigation" .}}
+
+      <!-- Flash messages section -->
+      {{if .Flashes}}
+      <ul class="flashes">
+        {{range .Flashes}}
+        <li>{{.}}</li>
         {{end}}
-        <div class="body">
-            {{block "body" .}}{{end}}
-        </div>
-        {{template "footer" .}}
+      </ul>
+      {{end}}
+      <div class="body">{{block "body" .}}{{end}}</div>
+      {{template "footer" .}}
     </div>
-</body>
+  </body>
 </html>
-{{end}}
-
-{{define "navigation"}}
+{{end}} {{define "navigation"}}
 <div class="navigation">
-    <nav>
-        <h1><a id="nav-logo" href="/">¿Who Knows?</a></h1>
-        <a href="/weather">Weather</a>
-        {{if .User}}
-            <a id="nav-logout" href="/logout">Log out [{{.User.Username}}]</a>
-        {{else}}
-            <a id="nav-login" href="/login">Log in</a>
-            <a id="nav-register" href="/register">Register</a>
-        {{end}}
-    </nav>
+  <nav>
+    <h1><a id="nav-logo" href="/">¿Who Knows?</a></h1>
+    <a href="/weather">Weather</a>
+    {{if .User}}
+    <a id="nav-logout" href="/logout">Log out [{{.User.Username}}]</a>
+    {{else}}
+    <a id="nav-login" href="/login">Log in</a>
+    <a id="nav-register" href="/register">Register</a>
+    {{end}}
+  </nav>
 </div>
-{{end}}
-
-{{define "footer"}}
+{{end}} {{define "footer"}}
 <div class="footer">
-    <span>¿Who Knows? &copy; 2009</span>
-    <a href="/about">About</a>
+  <span>¿Who Knows? &copy; 2024</span>
+  <a href="/about">About</a>
 </div>
 {{end}}
