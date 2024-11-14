@@ -2,7 +2,7 @@ name: Development SSL Deployment
 
 on:
   push:
-    branches: [ feature/enablehttps ]
+    branches: [ dev ]
   workflow_dispatch:
 
 env:
