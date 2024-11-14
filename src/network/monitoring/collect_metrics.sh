@@ -16,13 +16,11 @@ chmod 644 /var/log/metrics/*.log
 
 # Timestamp for the log entries
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+TODAY=$(date '+%Y-%m-%d')
 
 # Collect CPU load using /proc/loadavg
 CPU_LOAD=$(cat /proc/loadavg | awk '{print $1,$2,$3}')
 echo "[$TIMESTAMP] $CPU_LOAD" >> /var/log/metrics/cpu_load.log
-
-# Get today's date for filtering
-TODAY=$(date '+%Y-%m-%d')
 
 # Ensure access.log exists and is readable
 if [ -f /var/log/nginx/access.log ]; then
@@ -30,8 +28,8 @@ if [ -f /var/log/nginx/access.log ]; then
     UNIQUE_USERS=$(grep "$TODAY" /var/log/nginx/access.log | awk '{print $1}' | sort -u | wc -l)
     echo "[$TIMESTAMP] $UNIQUE_USERS" >> /var/log/metrics/daily_users.log
 
-    # Count searches for today
-    DAILY_SEARCHES=$(grep "$TODAY" /var/log/nginx/access.log | grep "GET /?q=" | wc -l)
+    # Count searches for today (excluding favicon and other non-search requests)
+    DAILY_SEARCHES=$(grep "$TODAY" /var/log/nginx/access.log | grep "GET /?q=" | grep -v "favicon" | wc -l)
     echo "[$TIMESTAMP] $DAILY_SEARCHES" >> /var/log/metrics/daily_searches.log
 else
     echo "[$TIMESTAMP] 0" >> /var/log/metrics/daily_users.log
