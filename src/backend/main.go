@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/handlers"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/middleware"
@@ -50,6 +51,7 @@ func main() {
 
 	// Apply global middlewares
 	r.Use(middleware.LoggingMiddleware)
+	r.Use(middleware.PrometheusMiddleware)
 	r.Use(middleware.SessionMiddleware(store))
 
 	// Set up routes
@@ -62,7 +64,7 @@ func main() {
 	r.HandleFunc("/greeting", handlers.Greeting).Methods("GET")
 
 	// Prometheus metrics endpoint
-	r.Use(middleware.PrometheusMiddleware)
+	r.Handle("/metrics", promhttp.Handler())
 
 	// API routes
 	api := r.PathPrefix("/api").Subrouter()
