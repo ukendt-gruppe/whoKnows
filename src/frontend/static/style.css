@@ -1,4 +1,5 @@
 /* Website Defaults */
+/* i come from new source */
 body {
   font-family: "Trebuchet MS", sans-serif;
   font-size: 14px;
@@ -10,7 +11,7 @@ div.page div.body {
   padding: 10px;
 }
 
-div.page div.footer {
+.footer {
   background: #fae4e4;
   color: #888;
   padding: 5px 10px;
