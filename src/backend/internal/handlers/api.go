@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/sessions"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/models"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
@@ -46,20 +47,24 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	if query != "" {
-		searchResults, err = db.QueryDB("SELECT * FROM pages WHERE language = ? AND content LIKE ?", language, "%"+query+"%")
+		searchResults, err = db.QueryDB(
+			"SELECT * FROM pages WHERE language = $1 AND content LIKE $2",
+			language,
+			"%"+query+"%",
+		)
 		if err != nil {
+			log.Printf("Search query error: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 	}
 
-	// Ensure empty data array if no results
 	if searchResults == nil {
 		searchResults = []map[string]interface{}{}
 	}
 
 	response := SearchResponse{Data: searchResults}
-	utils.JSONResponse(w, http.StatusOK, response) // Ensure status 200
+	utils.JSONResponse(w, http.StatusOK, response)
 }
 
 // Weather handles the /api/weather endpoint
@@ -95,23 +100,53 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	username := r.FormValue("username")
+	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	if username == "" || password == "" {
+	if username == "" || email == "" || password == "" {
 		utils.JSONResponse(w, http.StatusUnprocessableEntity, RequestValidationError{
-			StatusCode: http.StatusUnprocessableEntity, // Return 422 for validation error
+			StatusCode: http.StatusUnprocessableEntity,
 			Message:    "All fields are required",
 		})
 		return
 	}
 
-	// Registration logic here
+	// Check if user exists
+	existingUser, err := db.GetUser(username)
+	if err != nil && err != db.ErrUserNotFound {
+		log.Printf("Database error checking user: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	if existingUser != nil {
+		utils.JSONResponse(w, http.StatusConflict, AuthResponse{
+			StatusCode: http.StatusConflict,
+			Message:    "Username already exists",
+		})
+		return
+	}
+
+	// Create new user
+	err = db.CreateUser(username, email, password)
+	if err != nil {
+		log.Printf("Error creating user: %v", err)
+		if err.Error() == "username already exists" {
+			utils.JSONResponse(w, http.StatusConflict, AuthResponse{
+				StatusCode: http.StatusConflict,
+				Message:    "Username already exists",
+			})
+			return
+		}
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 
 	response := AuthResponse{
-		StatusCode: http.StatusOK,
+		StatusCode: http.StatusCreated,
 		Message:    "User registered successfully",
 	}
-	utils.JSONResponse(w, http.StatusOK, response)
+	utils.JSONResponse(w, http.StatusCreated, response)
 }
 
 // Login handles the /api/login endpoint
@@ -132,31 +167,73 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if username == "" || password == "" {
 		utils.JSONResponse(w, http.StatusUnprocessableEntity, RequestValidationError{
-			StatusCode: http.StatusUnprocessableEntity, // Return 422 for missing fields
+			StatusCode: http.StatusUnprocessableEntity,
 			Message:    "Username and password are required",
 		})
 		return
 	}
 
-	// Implement authentication logic here!
-	// If the credentials are correct, return the success response
-	if username != "" && password != "" {
-		response := AuthResponse{
-			StatusCode: http.StatusOK, // Ensure status 200
-			Message:    "Login successful",
+	user, err := db.GetUser(username)
+	if err != nil {
+		if err == db.ErrUserNotFound {
+			utils.JSONResponse(w, http.StatusUnauthorized, AuthResponse{
+				StatusCode: http.StatusUnauthorized,
+				Message:    "Invalid username or password",
+			})
+			return
 		}
-		utils.JSONResponse(w, http.StatusOK, response)
-	} else {
-		response := AuthResponse{
-			StatusCode: http.StatusUnauthorized, // Return 401 for invalid login
-			Message:    "Invalid username or password",
-		}
-		utils.JSONResponse(w, http.StatusUnauthorized, response)
+		log.Printf("Database error during login: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
+
+	if !utils.CheckPasswordHash(password, user.Password) {
+		utils.JSONResponse(w, http.StatusUnauthorized, AuthResponse{
+			StatusCode: http.StatusUnauthorized,
+			Message:    "Invalid username or password",
+		})
+		return
+	}
+
+	// Set session
+	session := r.Context().Value("session").(*sessions.Session)
+	session.Values["user"] = user
+	session.Values["user_id"] = user.ID
+	err = session.Save(r, w)
+	if err != nil {
+		log.Printf("Error saving session: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	response := AuthResponse{
+		StatusCode: http.StatusOK,
+		Message:    "Login successful",
+	}
+	utils.JSONResponse(w, http.StatusOK, response)
 }
 
 // Logout handles the /api/logout endpoint
 func Logout(w http.ResponseWriter, r *http.Request) {
+	session := r.Context().Value("session").(*sessions.Session)
+
+	// Clear all session values
+	for key := range session.Values {
+		delete(session.Values, key)
+	}
+
+	// Expire the cookie
+	session.Options.MaxAge = -1
+
+	log.Printf("API: Logging out user. Session values before save: %v", session.Values)
+
+	err := session.Save(r, w)
+	if err != nil {
+		log.Printf("API: Error saving session during logout: %v", err)
+		http.Error(w, "Error during logout", http.StatusInternalServerError)
+		return
+	}
+
 	response := AuthResponse{
 		StatusCode: http.StatusOK,
 		Message:    "Logout successful",

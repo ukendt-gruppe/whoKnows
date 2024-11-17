@@ -27,3 +27,5 @@ require (
 )
 
 require github.com/prometheus/client_golang v1.17.0
+
+require github.com/lib/pq v1.10.9 // indirect
