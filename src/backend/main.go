@@ -42,9 +42,9 @@ func init() {
 func main() {
 	// Initialize the database
 	if err := db.ConnectDB(); err != nil {
-		log.Fatalf("Could not connect to lacal database: %v", err)
+		log.Fatalf("Could not connect to database: %v", err)
 	}
-	log.Println("Local database connected successfully.")
+	log.Println("Database connected successfully.")
 
 	// Create a new router
 	r := mux.NewRouter()
