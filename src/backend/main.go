@@ -41,10 +41,10 @@ func init() {
 
 func main() {
 	// Initialize the database
-	if err := db.InitDB("./internal/db/schema.sql"); err != nil {
-		log.Fatalf("Could not initialize database: %v", err)
+	if err := db.ConnectDB(); err != nil {
+		log.Fatalf("Could not connect to database: %v", err)
 	}
-	log.Println("Database initialized successfully.")
+	log.Println("Database connected successfully.")
 
 	// Create a new router
 	r := mux.NewRouter()

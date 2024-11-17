@@ -7,12 +7,12 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/sessions"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
-	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/models"
-	
+	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
 )
 
 var templates *template.Template
@@ -57,7 +57,6 @@ func init() {
 	}
 }
 
-
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value("session").(*sessions.Session)
 	query := r.URL.Query().Get("q")
@@ -65,26 +64,39 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	if query != "" {
-		rows, err := db.DB.Query("SELECT title, url, content FROM pages WHERE title LIKE ? OR content LIKE ?", "%"+query+"%", "%"+query+"%")
+		rows, err := db.DB.Query(`
+			SELECT title, url, content, 'page' as source 
+			FROM pages 
+			WHERE language = $1 AND (title LIKE $2 OR content LIKE $2)
+			UNION ALL
+			SELECT title, url, content, 'wiki' as source 
+			FROM wiki_articles 
+			WHERE title LIKE $2 OR content LIKE $2
+			ORDER BY title
+		`, "en", "%"+query+"%")
+
 		if err != nil {
+			log.Printf("Search query error: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 		defer rows.Close()
 
 		for rows.Next() {
-				var title, url, content string
-				err = rows.Scan(&title, &url, &content)
-				if err != nil {
-						http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-						return
-				}
-				result := map[string]interface{}{
-						"title":   title,
-						"url":     url,
-						"content": content,
-				}
-				searchResults = append(searchResults, result)
+			var title, url, content, source string
+			err = rows.Scan(&title, &url, &content, &source)
+			if err != nil {
+				log.Printf("Row scan error: %v", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			result := map[string]interface{}{
+				"title":   title,
+				"url":     url,
+				"content": content,
+				"source":  source,
+			}
+			searchResults = append(searchResults, result)
 		}
 	}
 
@@ -97,51 +109,52 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = templates.ExecuteTemplate(w, "search", data)
 	if err != nil {
+		log.Printf("Template execution error: %v", err)
 		http.Error(w, "Error rendering page", http.StatusInternalServerError)
 	}
 	session.Save(r, w)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-  session := r.Context().Value("session").(*sessions.Session)
-  data := map[string]interface{}{
-    "Flashes": session.Flashes(),
-    "User":    session.Values["user"],
-  }
-  
-  if r.Method == "POST" {
-    username := r.FormValue("username")
-    password := r.FormValue("password")
-    user, err := db.GetUser(username)
-    if err != nil {
-      if err == db.ErrUserNotFound {
-        data["Error"] = "Invalid username or password"
-      } else {
-        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-        return
-      }
-    } else if user != nil && utils.CheckPasswordHash(password, user.Password) {
-      session.Values["user"] = user
-      session.Values["user_id"] = user.ID
-      session.AddFlash("You were logged in")
+	session := r.Context().Value("session").(*sessions.Session)
+	data := map[string]interface{}{
+		"Flashes": session.Flashes(),
+		"User":    session.Values["user"],
+	}
+
+	if r.Method == "POST" {
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+		user, err := db.GetUser(username)
+		if err != nil {
+			if err == db.ErrUserNotFound {
+				data["Error"] = "Invalid username or password"
+			} else {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+		} else if user != nil && utils.CheckPasswordHash(password, user.Password) {
+			session.Values["user"] = user
+			session.Values["user_id"] = user.ID
+			session.AddFlash("You were logged in")
 			err = session.Save(r, w)
 			if err != nil {
-					log.Printf("Error saving session: %v", err)
-					http.Error(w, "Error saving session", http.StatusInternalServerError)
-					return
+				log.Printf("Error saving session: %v", err)
+				http.Error(w, "Error saving session", http.StatusInternalServerError)
+				return
 			}
-      http.Redirect(w, r, "/", http.StatusSeeOther)
-      return
-    } else {
-      data["Error"] = "Invalid username or password"
-    }
-    data["Username"] = username
-  }
-  
-  err := templates.ExecuteTemplate(w, "login", data)
-  if err != nil {
-    http.Error(w, "Error rendering page", http.StatusInternalServerError)
-  }
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		} else {
+			data["Error"] = "Invalid username or password"
+		}
+		data["Username"] = username
+	}
+
+	err := templates.ExecuteTemplate(w, "login", data)
+	if err != nil {
+		http.Error(w, "Error rendering page", http.StatusInternalServerError)
+	}
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -160,54 +173,89 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		if password != password2 {
 			data["Error"] = "The two passwords do not match"
 		} else {
+			// First check if user exists
 			user, err := db.GetUser(username)
 			if err != nil && err != db.ErrUserNotFound {
+				log.Printf("Database error checking user: %v", err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
 			if user != nil {
-				data["Error"] = "The username is already taken"
+				data["Error"] = "Username already taken"
 			} else {
 				err := db.CreateUser(username, email, password)
 				if err != nil {
-					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					// Check for unique constraint violation
+					if strings.Contains(err.Error(), "unique constraint") {
+						if strings.Contains(err.Error(), "users_username_key") {
+							data["Error"] = "Username already taken"
+						} else if strings.Contains(err.Error(), "users_email_key") {
+							data["Error"] = "Email already registered"
+						} else {
+							data["Error"] = "Username or email already exists"
+						}
+					} else {
+						log.Printf("Error creating user: %v", err)
+						http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+						return
+					}
+				} else {
+					session.AddFlash("You were successfully registered and can login now")
+					session.Save(r, w)
+					http.Redirect(w, r, "/login", http.StatusSeeOther)
 					return
 				}
-				session.AddFlash("You were successfully registered and can login now")
-				session.Save(r, w)
-				http.Redirect(w, r, "/login", http.StatusSeeOther)
-				return
 			}
 		}
+		// Preserve form data on error
 		data["Username"] = username
 		data["Email"] = email
 	}
 
 	err := templates.ExecuteTemplate(w, "register", data)
 	if err != nil {
+		log.Printf("Template error: %v", err)
 		http.Error(w, "Error rendering page", http.StatusInternalServerError)
 	}
 	session.Save(r, w)
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-    session := r.Context().Value("session").(*sessions.Session)
-    delete(session.Values, "user")
-    log.Println("User logged out:", session.Values["user"])
-    session.AddFlash("You were logged out")
-    err := session.Save(r, w)
-    if err != nil {
-        http.Error(w, "Error saving session", http.StatusInternalServerError)
-        return
-    }
-    http.Redirect(w, r, "/", http.StatusSeeOther)
+	session := r.Context().Value("session").(*sessions.Session)
+
+	// Clear all session values
+	for key := range session.Values {
+		delete(session.Values, key)
+	}
+
+	// Expire the cookie
+	session.Options.MaxAge = -1
+
+	log.Printf("Logging out user. Session values before save: %v", session.Values)
+
+	err := session.Save(r, w)
+	if err != nil {
+		log.Printf("Error saving session during logout: %v", err)
+		http.Error(w, "Error during logout", http.StatusInternalServerError)
+		return
+	}
+
+	// Add flash message before redirect
+	session.AddFlash("You have been successfully logged out")
+	err = session.Save(r, w)
+	if err != nil {
+		log.Printf("Error saving flash message: %v", err)
+	}
+
+	log.Printf("User successfully logged out, redirecting to home")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 // AboutHandler renders the about template
 func AboutHandler(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value("session").(*sessions.Session)
 	data := map[string]interface{}{
-		"User": session.Values["user"],  // Pass User to the template
+		"User": session.Values["user"], // Pass User to the template
 	}
 
 	err := templates.ExecuteTemplate(w, "about", data)

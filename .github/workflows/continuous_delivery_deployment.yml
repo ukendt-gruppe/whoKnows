@@ -2,15 +2,16 @@ name: Continuous Delivery and Deployment
 
 on:
   push:
-    branches: [ main ]
+    branches: [ feature/dbsetup-production ]
   pull_request:
-    branches: [ main ]
+    branches: [ feature/dbsetup-production ]
   workflow_dispatch:
 
 env:
   CR_PAT: ${{ secrets.CR_PAT }}
   DOCKER_GITHUB_USERNAME: ${{ secrets.DOCKER_GITHUB_USERNAME }}
   ENV_GREETING: ${{ secrets.ENV_GREETING }}
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
 jobs:
   build-and-push:
@@ -49,6 +50,7 @@ jobs:
         run: |
           echo "WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}" >> .env
           echo "ENV_GREETING=${{ secrets.ENV_GREETING }}" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
 
       - name: Transfer files to server
         run: |

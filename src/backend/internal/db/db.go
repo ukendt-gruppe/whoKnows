@@ -2,17 +2,15 @@ package db
 
 import (
 	"database/sql"
+	"encoding/gob"
 	"errors"
 	"fmt"
 	"log"
 	"os"
-	"encoding/gob"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/utils"
 )
-
-const DATABASE_PATH = "./internal/db/whoknows.db"
 
 var DB *sql.DB
 
@@ -21,31 +19,23 @@ var (
 	ErrInvalidUser  = errors.New("invalid user")
 )
 
-// InitDB initializes the database connection and creates tables if they don't exist.
-func InitDB(schemaPath string) error {
+func ConnectDB() error {
+	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		return fmt.Errorf("DATABASE_URL environment variable is not set")
+	}
+
 	var err error
-	DB, err = sql.Open("sqlite3", DATABASE_PATH)
+	DB, err = sql.Open("postgres", dbURL)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %v", err)
 	}
 
-	// Check if the database file exists
-	if _, err := os.Stat(DATABASE_PATH); os.IsNotExist(err) {
-		log.Printf("Database not found at: %s. Creating new database.", DATABASE_PATH)
+	if err = DB.Ping(); err != nil {
+		return fmt.Errorf("failed to ping database: %v", err)
 	}
 
-	// Read and execute the schema
-	schema, err := os.ReadFile(schemaPath)
-	if err != nil {
-		return fmt.Errorf("failed to read schema file: %v", err)
-	}
-
-	_, err = DB.Exec(string(schema))
-	if err != nil {
-		return fmt.Errorf("failed to execute schema: %v", err)
-	}
-
-	log.Println("Initialized the database:", DATABASE_PATH)
+	log.Printf("Successfully connected to PostgreSQL database")
 	return nil
 }
 
@@ -95,7 +85,8 @@ func QueryDB(query string, args ...interface{}) ([]map[string]interface{}, error
 // GetUserID looks up the ID for a given username.
 func GetUserID(username string) (int, error) {
 	var id int
-	query := "SELECT id FROM users WHERE username = ?"
+	// Note: Changed ? to $1 for PostgreSQL parameterization
+	query := "SELECT id FROM users WHERE username = $1"
 	err := DB.QueryRow(query, username).Scan(&id)
 	if err == sql.ErrNoRows {
 		return 0, nil // No matching user found
@@ -105,16 +96,17 @@ func GetUserID(username string) (int, error) {
 	return id, nil
 }
 
-// GetUser retrieves a user by username.
+// GetUser retrieves a user by username or ID.
 func GetUser(identifier interface{}) (*User, error) {
 	var user User
 	var err error
 	switch v := identifier.(type) {
 	case string:
-		err = DB.QueryRow("SELECT id, username, email, password FROM users WHERE username = ?", v).Scan(
+		// Note: Changed ? to $1 for PostgreSQL parameterization
+		err = DB.QueryRow("SELECT id, username, email, password FROM users WHERE username = $1", v).Scan(
 			&user.ID, &user.Username, &user.Email, &user.Password)
 	case int:
-		err = DB.QueryRow("SELECT id, username, email, password FROM users WHERE id = ?", v).Scan(
+		err = DB.QueryRow("SELECT id, username, email, password FROM users WHERE id = $1", v).Scan(
 			&user.ID, &user.Username, &user.Email, &user.Password)
 	default:
 		return nil, ErrInvalidUser
@@ -135,19 +127,20 @@ func CreateUser(username, email, password string) error {
 		return err
 	}
 
-	_, err = DB.Exec("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+	// Note: Changed ? to $1, $2, $3 for PostgreSQL parameterization
+	_, err = DB.Exec("INSERT INTO users (username, email, password) VALUES ($1, $2, $3)",
 		username, email, hashedPassword)
 	return err
 }
 
 // User represents a user in the database.
 type User struct {
-  ID       int
-  Username string
-  Email    string
-  Password string
+	ID       int
+	Username string
+	Email    string
+	Password string
 }
 
 func init() {
-  gob.Register(&User{})
+	gob.Register(&User{})
 }
