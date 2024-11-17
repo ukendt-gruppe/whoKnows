@@ -101,5 +101,5 @@ jobs:
     - name: Lint Dockerfile.nginx
       uses: hadolint/hadolint-action@v3.1.0
       with:
-        dockerfile: src/Network/Dockerfile.nginx
+        dockerfile: src/network/Dockerfile.nginx
         ignore: DL3018,DL3059,DL3007
