@@ -86,7 +86,12 @@ jobs:
       with:
         go-version: '1.23.1'
 
-    - name: Lint Dockerfile
+    - name: Find all Dockerfiles
+      id: find-dockerfiles
+      run: |
+        echo "dockerfiles=$(find . -type f -name "Dockerfile*" | tr '\n' ' ')" >> $GITHUB_OUTPUT
+
+    - name: Lint Dockerfiles
       uses: hadolint/hadolint-action@v3.1.0
       with:
-        dockerfile: src/Dockerfile
+        dockerfile: ${{ steps.find-dockerfiles.outputs.dockerfiles }}
