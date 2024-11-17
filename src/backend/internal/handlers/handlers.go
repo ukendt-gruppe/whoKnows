@@ -64,24 +64,29 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	if query != "" {
-		// Updated to use $1, $2 for PostgreSQL
-		rows, err := db.DB.Query(
-			"SELECT title, url, content FROM pages WHERE title LIKE $1 OR content LIKE $2",
-			"%"+query+"%",
-			"%"+query+"%",
-		)
+		rows, err := db.DB.Query(`
+			SELECT title, url, content, 'page' as source 
+			FROM pages 
+			WHERE language = $1 AND (title LIKE $2 OR content LIKE $2)
+			UNION ALL
+			SELECT title, url, content, 'wiki' as source 
+			FROM wiki_articles 
+			WHERE title LIKE $2 OR content LIKE $2
+			ORDER BY title
+		`, "en", "%"+query+"%")
+
 		if err != nil {
-			log.Printf("Search query error: %v", err) // Added logging
+			log.Printf("Search query error: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 		defer rows.Close()
 
 		for rows.Next() {
-			var title, url, content string
-			err = rows.Scan(&title, &url, &content)
+			var title, url, content, source string
+			err = rows.Scan(&title, &url, &content, &source)
 			if err != nil {
-				log.Printf("Row scan error: %v", err) // Added logging
+				log.Printf("Row scan error: %v", err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
@@ -89,6 +94,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 				"title":   title,
 				"url":     url,
 				"content": content,
+				"source":  source,
 			}
 			searchResults = append(searchResults, result)
 		}
@@ -103,7 +109,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = templates.ExecuteTemplate(w, "search", data)
 	if err != nil {
-		log.Printf("Template execution error: %v", err) // Added logging
+		log.Printf("Template execution error: %v", err)
 		http.Error(w, "Error rendering page", http.StatusInternalServerError)
 	}
 	session.Save(r, w)

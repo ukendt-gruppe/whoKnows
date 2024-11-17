@@ -47,11 +47,18 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	if query != "" {
-		searchResults, err = db.QueryDB(
-			"SELECT * FROM pages WHERE language = $1 AND content LIKE $2",
-			language,
-			"%"+query+"%",
-		)
+		// Modified query to only check language in pages table
+		searchResults, err = db.QueryDB(`
+			SELECT title, url, content, 'page' as source 
+			FROM pages 
+			WHERE language = $1 AND (title LIKE $2 OR content LIKE $2)
+			UNION ALL
+			SELECT title, url, content, 'wiki' as source 
+			FROM wiki_articles 
+			WHERE title LIKE $2 OR content LIKE $2
+			ORDER BY title
+		`, language, "%"+query+"%")
+
 		if err != nil {
 			log.Printf("Search query error: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
