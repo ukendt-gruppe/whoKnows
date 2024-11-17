@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/handlers"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/middleware"
@@ -35,20 +36,22 @@ func init() {
 		MaxAge:   86400 * 7, // 7 days
 		HttpOnly: true,
 	}
+
 }
 
 func main() {
 	// Initialize the database
-	if err := db.InitDB("./internal/db/schema.sql"); err != nil {
-		log.Fatalf("Could not initialize database: %v", err)
+	if err := db.ConnectDB(); err != nil {
+		log.Fatalf("Could not connect to database: %v", err)
 	}
-	log.Println("Database initialized successfully.")
+	log.Println("Database connected successfully.")
 
 	// Create a new router
 	r := mux.NewRouter()
 
 	// Apply global middlewares
 	r.Use(middleware.LoggingMiddleware)
+	r.Use(middleware.PrometheusMiddleware)
 	r.Use(middleware.SessionMiddleware(store))
 
 	// Set up routes
@@ -59,6 +62,9 @@ func main() {
 	r.HandleFunc("/logout", handlers.LogoutHandler).Methods("GET")
 	r.HandleFunc("/weather", handlers.WeatherHandler).Methods("GET")
 	r.HandleFunc("/greeting", handlers.Greeting).Methods("GET")
+
+	// Prometheus metrics endpoint
+	r.Handle("/metrics", promhttp.Handler())
 
 	// API routes
 	api := r.PathPrefix("/api").Subrouter()

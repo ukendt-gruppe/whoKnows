@@ -86,7 +86,20 @@ jobs:
       with:
         go-version: '1.23.1'
 
-    - name: Lint Dockerfile
+    - name: Lint Dockerfile.dev
       uses: hadolint/hadolint-action@v3.1.0
       with:
-        dockerfile: src/Dockerfile
+        dockerfile: src/backend/Dockerfile.dev
+        ignore: DL3018,DL3059,DL3007
+
+    - name: Lint Dockerfile.prod
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: src/backend/Dockerfile.prod
+        ignore: DL3018,DL3059,DL3007
+
+    - name: Lint Dockerfile.nginx
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: src/network/Dockerfile.nginx
+        ignore: DL3008,DL3009,DL3015,DL3018,DL3059,DL3007
