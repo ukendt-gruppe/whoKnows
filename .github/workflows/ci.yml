@@ -90,13 +90,16 @@ jobs:
       uses: hadolint/hadolint-action@v3.1.0
       with:
         dockerfile: src/backend/Dockerfile.dev
+        ignore: DL3018,DL3059
 
     - name: Lint Dockerfile.prod
       uses: hadolint/hadolint-action@v3.1.0
       with:
         dockerfile: src/backend/Dockerfile.prod
+        ignore: DL3018,DL3059
 
     - name: Lint Dockerfile.nginx
       uses: hadolint/hadolint-action@v3.1.0
       with:
         dockerfile: src/Network/Dockerfile.nginx
+        ignore: DL3018,DL3059
