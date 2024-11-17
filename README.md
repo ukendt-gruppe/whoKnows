@@ -1,5 +1,27 @@
 ![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/svdf18/44e7725b61d78d612fa0ee53b3437c78/raw/go-coverage.json)
 
+### Run Database For Development (github.com/ukendt-gruppe/wiki_scraper)
+```
+DOCKER COMPOSE DB:
+cd docker
+docker compose -f docker-compose.dev.yml up
+
+INTERACT WITH DB (In another terminal window):
+docker exec -it <db_container_name> psql -U <db_user> -d <db_name>
+```
+
+### RUN APP in Development (github.com/ukendt-gruppe/whoKnows)
+```
+cd src/backend
+go run main.go
+```
+
+### RUN APP in Development w/ Docker (WIP)
+```
+cd src
+docker compose -f docker-compose.dev.yml up
+```
+
 # Whoknows (Ukendt Gruppe)
 
 This is the Ukendt Gruppe edit of Whoknows search engine project

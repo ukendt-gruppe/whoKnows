@@ -8,6 +8,9 @@ services:
     volumes:
       - ./backend:/app
       - ./frontend:/app/frontend
+    env_file:
+      - ./backend/.env
     ports:
       - "8080:8080"
+    network_mode: "host"
     working_dir: /app
