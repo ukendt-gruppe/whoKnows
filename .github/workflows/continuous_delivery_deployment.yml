@@ -2,9 +2,9 @@ name: Continuous Delivery and Deployment
 
 on:
   push:
-    branches: [ feature/dbsetup-production ]
+    branches: [ main ]
   pull_request:
-    branches: [ feature/dbsetup-production ]
+    branches: [ main ]
   workflow_dispatch:
 
 env:
