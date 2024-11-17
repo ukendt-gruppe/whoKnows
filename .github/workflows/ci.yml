@@ -86,12 +86,34 @@ jobs:
       with:
         go-version: '1.23.1'
 
-    - name: Find all Dockerfiles
+    - name: Find and verify Dockerfiles
       id: find-dockerfiles
       run: |
-        echo "dockerfiles=$(find . -type f -name "Dockerfile*" | tr '\n' ' ')" >> $GITHUB_OUTPUT
+        # Find all Dockerfiles and store in a variable
+        DOCKERFILES=$(find . -type f -name "Dockerfile*")
+        
+        # Print found Dockerfiles for debugging
+        echo "Found Dockerfiles:"
+        echo "$DOCKERFILES"
+        
+        # Verify files exist and create space-separated list
+        DOCKERFILE_LIST=""
+        for file in $DOCKERFILES; do
+          if [ -f "$file" ]; then
+            DOCKERFILE_LIST="$DOCKERFILE_LIST $file"
+          fi
+        done
+        
+        # Trim leading space and store in output
+        DOCKERFILE_LIST="$(echo -e "${DOCKERFILE_LIST}" | sed -e 's/^[[:space:]]*//')"
+        echo "dockerfiles=$DOCKERFILE_LIST" >> $GITHUB_OUTPUT
+        
+        # Print final list for verification
+        echo "Final Dockerfile list:"
+        echo "$DOCKERFILE_LIST"
 
     - name: Lint Dockerfiles
+      if: steps.find-dockerfiles.outputs.dockerfiles != ''
       uses: hadolint/hadolint-action@v3.1.0
       with:
         dockerfile: ${{ steps.find-dockerfiles.outputs.dockerfiles }}
