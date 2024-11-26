@@ -61,7 +61,16 @@ var (
 			Name: "whoknows_system_logs_total",
 			Help: "Total number of system log entries",
 		},
+
 		[]string{"log_type", "message"},
+	)
+
+	// Memory usage (in MB)
+	memoryUsage = promauto.NewGauge(
+		prometheus.GaugeOpts{
+			Name: "whoknows_memory_usage_mb",
+			Help: "Current memory usage in megabytes",
+		},
 	)
 )
 
@@ -86,6 +95,11 @@ func PrometheusMiddleware(next http.Handler) http.Handler {
 		var cpuStats runtime.MemStats
 		runtime.ReadMemStats(&cpuStats)
 		cpuUsage.Set(float64(cpuStats.Sys) / float64(1024*1024)) // Convert to MB
+
+		// Update memory usage metrics
+		var memStats runtime.MemStats
+		runtime.ReadMemStats(&memStats)
+		memoryUsage.Set(float64(memStats.Alloc) / (1024 * 1024)) // Convert bytes to MB
 
 		// Track visits to specific endpoints
 		visitedEndpoints.WithLabelValues(r.URL.Path).Inc()
