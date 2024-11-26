@@ -10,6 +10,7 @@ import (
 )
 
 var (
+	// Total HTTP requests
 	requestsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "whoknows_http_requests_total",
@@ -18,6 +19,7 @@ var (
 		[]string{"method", "endpoint", "status"},
 	)
 
+	// HTTP request durations (response times)
 	requestDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "whoknows_http_request_duration_seconds",
@@ -27,6 +29,7 @@ var (
 		[]string{"method", "endpoint"},
 	)
 
+	// HTTP request errors
 	errorRates = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "whoknows_http_request_errors_total",
@@ -35,11 +38,30 @@ var (
 		[]string{"method", "endpoint"},
 	)
 
+	// CPU usage (in percentage)
 	cpuUsage = promauto.NewGauge(
 		prometheus.GaugeOpts{
 			Name: "whoknows_cpu_usage_percent",
 			Help: "Current CPU usage percentage",
 		},
+	)
+
+	// Visited endpoints (how many times a specific URL has been visited)
+	visitedEndpoints = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "whoknows_visited_endpoints_total",
+			Help: "Total number of visits to specific endpoints",
+		},
+		[]string{"endpoint"},
+	)
+
+	// System logs (a simple example of counting system events)
+	systemLogs = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "whoknows_system_logs_total",
+			Help: "Total number of system log entries",
+		},
+		[]string{"log_type", "message"},
 	)
 )
 
@@ -60,11 +82,23 @@ func PrometheusMiddleware(next http.Handler) http.Handler {
 			errorRates.WithLabelValues(r.Method, r.URL.Path).Inc()
 		}
 
-		// Update CPU metrics
+		// Update CPU usage metrics
 		var cpuStats runtime.MemStats
 		runtime.ReadMemStats(&cpuStats)
 		cpuUsage.Set(float64(cpuStats.Sys) / float64(1024*1024)) // Convert to MB
+
+		// Track visits to specific endpoints
+		visitedEndpoints.WithLabelValues(r.URL.Path).Inc()
+
+		// Log system event (example: log a message)
+		logSystemEvent("INFO", "Request processed successfully")
 	})
+}
+
+// logSystemEvent is a helper function to simulate logging system events to Prometheus
+func logSystemEvent(logType, message string) {
+	// For now, log system events as informational or errors
+	systemLogs.WithLabelValues(logType, message).Inc()
 }
 
 // statusRecorder is a wrapper around http.ResponseWriter that captures the status code
