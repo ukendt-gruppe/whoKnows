@@ -71,7 +71,6 @@ jobs:
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/monitoring/collect_metrics.sh $SSH_USER@$SSH_HOST:network/monitoring/collect_metrics.sh
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/monitoring/show_metrics.sh $SSH_USER@$SSH_HOST:network/monitoring/show_metrics.sh
           scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/monitoring/prometheus.yml $SSH_USER@$SSH_HOST:prometheus.yml
-          scp -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no src/network/monitoring/grafana.ini $SSH_USER@$SSH_HOST:grafana.ini
 
           # Verify files exist (updated to check specific files)
           ssh -i ~/.ssh/ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST '
