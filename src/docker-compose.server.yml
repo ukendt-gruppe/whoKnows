@@ -48,7 +48,8 @@ services:
       - grafana_data:/var/lib/grafana
       - ./grafana.ini:/etc/grafana/grafana.ini
     environment:
-      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/grafana
+      - GF_SERVER_DOMAIN=monitor.monkbusiness.dk
+      - GF_SERVER_ROOT_URL=https://monitor.monkbusiness.dk/grafana
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
     networks:
       - my_network
