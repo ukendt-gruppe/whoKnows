@@ -41,6 +41,19 @@ services:
     networks:
       - my_network
 
+  # grafana service
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana.ini:/etc/grafana/grafana.ini
+    environment:
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://monitor.monkbusiness.dk/grafana
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    networks:
+      - my_network
+
 networks:
   my_network:
     driver: bridge
@@ -49,3 +62,4 @@ volumes:
   letsencrypt:
   certbot-www:
   metrics_logs:
+  grafana_data: 
