@@ -46,7 +46,7 @@ services:
     image: grafana/grafana:latest
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./grafana:/etc/grafana
+      - ./grafana.ini:/etc/grafana/grafana.ini
     environment:
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_SERVER_ROOT_URL=https://monitor.monkbusiness.dk/grafana
