@@ -19,8 +19,8 @@ if [ ! -f /etc/letsencrypt/live/monkbusiness.dk/fullchain.pem ]; then
             --non-interactive \
             --agree-tos \
             --email monk@monkbusiness.dk \
-            -d monkbusiness.dk
-
+            -d monkbusiness.dk \
+            -d monitor.monkbusiness.dk
     # If certificate was obtained successfully, create SSL configuration
     if [ -f /etc/letsencrypt/live/monkbusiness.dk/fullchain.pem ]; then
         cat > $SSL_CONF <<EOF
