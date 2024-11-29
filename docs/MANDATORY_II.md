@@ -1,6 +1,6 @@
 # How are you DevOps?
 
-We havetried to work with as many DevOps principles as possible throughout the semester. It has been both rewarding and challenging - skewing a bit towards the latter
+We have tried to work with as many DevOps principles as possible throughout the semester. It has been both rewarding and challenging - skewing a bit towards the latter
 
 ## Collaboration
 
