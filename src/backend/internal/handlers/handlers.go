@@ -77,7 +77,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			log.Printf("Search query error: %v", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, intErr, http.StatusInternalServerError)
 			return
 		}
 		defer rows.Close()
@@ -87,7 +87,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 			err = rows.Scan(&title, &url, &content, &source)
 			if err != nil {
 				log.Printf("Row scan error: %v", err)
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				http.Error(w, intErr, http.StatusInternalServerError)
 				return
 			}
 			result := map[string]interface{}{
@@ -110,7 +110,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	err = templates.ExecuteTemplate(w, "search", data)
 	if err != nil {
 		log.Printf("Template execution error: %v", err)
-		http.Error(w, "Error rendering page", http.StatusInternalServerError)
+		http.Error(w, rendErr, http.StatusInternalServerError)
 	}
 	session.Save(r, w)
 }
@@ -130,7 +130,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			if err == db.ErrUserNotFound {
 				data["Error"] = "Invalid username or password"
 			} else {
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				http.Error(w, intErr, http.StatusInternalServerError)
 				return
 			}
 		} else if user != nil && utils.CheckPasswordHash(password, user.Password) {
@@ -153,7 +153,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := templates.ExecuteTemplate(w, "login", data)
 	if err != nil {
-		http.Error(w, "Error rendering page", http.StatusInternalServerError)
+		http.Error(w, rendErr, http.StatusInternalServerError)
 	}
 }
 
@@ -177,7 +177,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			user, err := db.GetUser(username)
 			if err != nil && err != db.ErrUserNotFound {
 				log.Printf("Database error checking user: %v", err)
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				http.Error(w, intErr, http.StatusInternalServerError)
 				return
 			}
 			if user != nil {
@@ -196,7 +196,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 						}
 					} else {
 						log.Printf("Error creating user: %v", err)
-						http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+						http.Error(w, intErr, http.StatusInternalServerError)
 						return
 					}
 				} else {
@@ -215,7 +215,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	err := templates.ExecuteTemplate(w, "register", data)
 	if err != nil {
 		log.Printf("Template error: %v", err)
-		http.Error(w, "Error rendering page", http.StatusInternalServerError)
+		http.Error(w, rendErr, http.StatusInternalServerError)
 	}
 	session.Save(r, w)
 }
@@ -261,7 +261,7 @@ func AboutHandler(w http.ResponseWriter, r *http.Request) {
 	err := templates.ExecuteTemplate(w, "about", data)
 	if err != nil {
 		log.Printf("Error rendering about template: %v", err)
-		http.Error(w, "Error rendering page", http.StatusInternalServerError)
+		http.Error(w, rendErr, http.StatusInternalServerError)
 	}
 }
 
@@ -286,6 +286,6 @@ func WeatherHandler(w http.ResponseWriter, r *http.Request) {
 	err = templates.ExecuteTemplate(w, "weather", templateData)
 	if err != nil {
 		log.Printf("Error rendering weather template: %v", err)
-		http.Error(w, "Error rendering page", http.StatusInternalServerError)
+		http.Error(w, rendErr, http.StatusInternalServerError)
 	}
 }
