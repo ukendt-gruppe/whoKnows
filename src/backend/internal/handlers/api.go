@@ -61,7 +61,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			log.Printf("Search query error: %v", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, intErr, http.StatusInternalServerError)
 			return
 		}
 	}
@@ -122,7 +122,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	existingUser, err := db.GetUser(username)
 	if err != nil && err != db.ErrUserNotFound {
 		log.Printf("Database error checking user: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, intErr, http.StatusInternalServerError)
 		return
 	}
 
@@ -145,7 +145,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, intErr, http.StatusInternalServerError)
 		return
 	}
 
@@ -190,7 +190,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		log.Printf("Database error during login: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, intErr, http.StatusInternalServerError)
 		return
 	}
 
@@ -209,7 +209,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	err = session.Save(r, w)
 	if err != nil {
 		log.Printf("Error saving session: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, intErr, http.StatusInternalServerError)
 		return
 	}
 
