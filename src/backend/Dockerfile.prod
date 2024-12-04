@@ -15,7 +15,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -o main .
 
 # Use a minimal alpine image for the final stage
 # Final stage
-FROM alpine:latest
+FROM alpine:3.19.1
 
 WORKDIR /root/
 

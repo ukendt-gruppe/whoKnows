@@ -1,25 +1,30 @@
-FROM nginx:latest
+FROM nginx:1.25.3-alpine
 
-# Install certbot and its nginx plugin
-RUN apt-get update && \
-    apt-get install -y certbot python3-certbot-nginx && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Create a non-root user
+RUN addgroup -S nginx-custom && adduser -S nginx-custom -G nginx-custom
 
+# Install certbot and its nginx plugin with cache mounting
+RUN --mount=type=cache,target=/var/cache/apk \
+    apk add --no-cache certbot py3-certbot-nginx
+
+# Copy configuration files
 COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./ssl-init.sh /docker-entrypoint.d/ssl-init.sh
+COPY ./monitoring/collect_metrics.sh /usr/local/bin/
+COPY ./monitoring/show_metrics.sh /usr/local/bin/
 
-RUN chmod +x /docker-entrypoint.d/ssl-init.sh
+# Set permissions and install cron
+RUN chmod +x /docker-entrypoint.d/ssl-init.sh \
+    /usr/local/bin/collect_metrics.sh \
+    /usr/local/bin/show_metrics.sh && \
+    apk add --no-cache dcron
+
+# Add cron job
+RUN echo "*/5 * * * * /usr/local/bin/collect_metrics.sh" | crontab -
+
+# Switch to non-root user
+USER nginx-custom
 
 EXPOSE 80 443 9090
 
 CMD ["nginx", "-g", "daemon off;"]
-
-# Add metrics scripts and cron
-COPY ./monitoring/collect_metrics.sh /usr/local/bin/
-COPY ./monitoring/show_metrics.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/collect_metrics.sh && \
-    chmod +x /usr/local/bin/show_metrics.sh && \
-    apt-get update && \
-    apt-get install -y cron && \
-    echo "*/5 * * * * root /usr/local/bin/collect_metrics.sh" >> /etc/crontab
