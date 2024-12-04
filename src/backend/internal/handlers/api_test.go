@@ -63,7 +63,7 @@ func TestRegister(t *testing.T) {
 			name:           "Valid registration",
 			method:         http.MethodPost,
 			username:       "testuser",
-			email:          "test@example.com",
+			email:          testEmail,
 			password:       "testpass",
 			expectedStatus: http.StatusCreated,
 			expectedBody:   `{"statusCode":201,"message":"User registered successfully"}`,
@@ -75,7 +75,7 @@ func TestRegister(t *testing.T) {
 
 				// Expect insert new user
 				mock.ExpectExec(`INSERT INTO users`).
-					WithArgs("testuser", "test@example.com", sqlmock.AnyArg()).
+					WithArgs("testuser", testEmail, sqlmock.AnyArg()).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 		},
@@ -83,7 +83,7 @@ func TestRegister(t *testing.T) {
 			name:           "Username already exists",
 			method:         http.MethodPost,
 			username:       "existinguser",
-			email:          "test@example.com",
+			email:          testEmail,
 			password:       "testpass",
 			expectedStatus: http.StatusConflict,
 			expectedBody:   `{"statusCode":409,"message":"Username already exists"}`,
@@ -91,7 +91,7 @@ func TestRegister(t *testing.T) {
 				mock.ExpectQuery(`SELECT (.+) FROM users WHERE username = \$1`).
 					WithArgs("existinguser").
 					WillReturnRows(sqlmock.NewRows([]string{"id", "username", "email", "password"}).
-						AddRow(1, "existinguser", "test@example.com", "hashedpass"))
+						AddRow(1, "existinguser", testEmail, "hashedpass"))
 			},
 		},
 	}
@@ -120,11 +120,11 @@ func TestRegister(t *testing.T) {
 			handler.ServeHTTP(rr, req)
 
 			if status := rr.Code; status != tt.expectedStatus {
-				t.Errorf("handler returned wrong status code: got %v want %v", status, tt.expectedStatus)
+				t.Errorf(statErr, status, tt.expectedStatus)
 			}
 
 			if strings.TrimSpace(rr.Body.String()) != tt.expectedBody {
-				t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), tt.expectedBody)
+				t.Errorf(bodErr, rr.Body.String(), tt.expectedBody)
 			}
 
 			// Verify all expectations were met
@@ -177,7 +177,7 @@ func TestSearch(t *testing.T) {
 			handler.ServeHTTP(rr, req)
 
 			if status := rr.Code; status != tt.expectedStatus {
-				t.Errorf("handler returned wrong status code: got %v want %v", status, tt.expectedStatus)
+				t.Errorf(statErr, status, tt.expectedStatus)
 			}
 
 			if err := mock.ExpectationsWereMet(); err != nil {
@@ -213,7 +213,7 @@ func TestLogin(t *testing.T) {
 				// Create an actual hashed password for "testpass"
 				hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("testpass"), bcrypt.DefaultCost)
 				rows := sqlmock.NewRows([]string{"id", "username", "email", "password"}).
-					AddRow(1, "testuser", "test@example.com", string(hashedPassword))
+					AddRow(1, "testuser", testEmail, string(hashedPassword))
 				mock.ExpectQuery(`SELECT (.+) FROM users WHERE username = \$1`).
 					WithArgs("testuser").
 					WillReturnRows(rows)
@@ -270,11 +270,11 @@ func TestLogin(t *testing.T) {
 			handler.ServeHTTP(rr, req)
 
 			if status := rr.Code; status != tt.expectedStatus {
-				t.Errorf("handler returned wrong status code: got %v want %v", status, tt.expectedStatus)
+				t.Errorf(statErr, status, tt.expectedStatus)
 			}
 
 			if strings.TrimSpace(rr.Body.String()) != tt.expectedBody {
-				t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), tt.expectedBody)
+				t.Errorf(bodErr, rr.Body.String(), tt.expectedBody)
 			}
 		})
 	}
@@ -295,11 +295,11 @@ func TestLogout(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		t.Errorf(statErr, status, http.StatusOK)
 	}
 
 	expected := `{"statusCode":200,"message":"Logout successful"}`
 	if strings.TrimSpace(rr.Body.String()) != expected {
-		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+		t.Errorf(bodErr, rr.Body.String(), expected)
 	}
 }
