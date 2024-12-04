@@ -2,29 +2,23 @@ FROM golang:1.23.1-alpine
 
 WORKDIR /app
 
-# Install build essentials and SQLite
+# Install build essentials, Air, and dependencies
 RUN apk add --no-cache \
+    build-base \
     gcc \
     musl-dev \
     sqlite-dev \
-    sqlite-libs \
-    build-base
+    sqlite-libs && \
+    go install github.com/air-verse/air@latest && \
+    go mod download && \
+    mkdir -p tmp frontend/templates internal/db
 
 # Enable CGO
 ENV CGO_ENABLED=1
 ENV GOOS=linux
 
-# Install Air
-RUN go install github.com/air-verse/air@latest
-
 # Copy go mod files
 COPY go.mod go.sum ./
-
-# Download dependencies
-RUN go mod download
-
-# Create necessary directories
-RUN mkdir -p tmp frontend/templates internal/db
 
 # Copy .air.toml first
 COPY .air.toml .
@@ -34,4 +28,3 @@ COPY . .
 
 # Run air with debug output
 CMD ["air", "-d"]
-
