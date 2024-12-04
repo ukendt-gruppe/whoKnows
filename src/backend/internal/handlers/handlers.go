@@ -165,51 +165,14 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "POST" {
-		username := r.FormValue("username")
-		email := r.FormValue("email")
-		password := r.FormValue("password")
-		password2 := r.FormValue("password2")
-
-		if password != password2 {
-			data["Error"] = "The two passwords do not match"
+		errorMessage := validateAndRegisterUser(r, session)
+		if errorMessage != "" {
+			data["Error"] = errorMessage
+			data["Username"] = r.FormValue("username")
+			data["Email"] = r.FormValue("email")
 		} else {
-			// First check if user exists
-			user, err := db.GetUser(username)
-			if err != nil && err != db.ErrUserNotFound {
-				log.Printf("Database error checking user: %v", err)
-				http.Error(w, intErr, http.StatusInternalServerError)
-				return
-			}
-			if user != nil {
-				data["Error"] = "Username already taken"
-			} else {
-				err := db.CreateUser(username, email, password)
-				if err != nil {
-					// Check for unique constraint violation
-					if strings.Contains(err.Error(), "unique constraint") {
-						if strings.Contains(err.Error(), "users_username_key") {
-							data["Error"] = "Username already taken"
-						} else if strings.Contains(err.Error(), "users_email_key") {
-							data["Error"] = "Email already registered"
-						} else {
-							data["Error"] = "Username or email already exists"
-						}
-					} else {
-						log.Printf("Error creating user: %v", err)
-						http.Error(w, intErr, http.StatusInternalServerError)
-						return
-					}
-				} else {
-					session.AddFlash("You were successfully registered and can login now")
-					session.Save(r, w)
-					http.Redirect(w, r, "/login", http.StatusSeeOther)
-					return
-				}
-			}
+			return
 		}
-		// Preserve form data on error
-		data["Username"] = username
-		data["Email"] = email
 	}
 
 	err := templates.ExecuteTemplate(w, "register", data)
@@ -218,6 +181,58 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, rendErr, http.StatusInternalServerError)
 	}
 	session.Save(r, w)
+}
+
+func validateAndRegisterUser(r *http.Request, session *sessions.Session) string {
+	username := r.FormValue("username")
+	email := r.FormValue("email")
+	password := r.FormValue("password")
+	password2 := r.FormValue("password2")
+
+	// Password match validation
+	if password != password2 {
+		return "The two passwords do not match"
+	}
+
+	// Check if user exists
+	user, err := db.GetUser(username)
+	if err != nil && err != db.ErrUserNotFound {
+		log.Printf("Database error checking user: %v", err)
+		http.Error(r.Context().Value("w").(http.ResponseWriter), intErr, http.StatusInternalServerError)
+		return ""
+	}
+
+	// Username taken check
+	if user != nil {
+		return "Username already taken"
+	}
+
+	// Create user
+	err = db.CreateUser(username, email, password)
+	if err != nil {
+		return handleRegistrationError(err)
+	}
+
+	// Successful registration
+	session.AddFlash("You were successfully registered and can login now")
+	session.Save(r, r.Context().Value("w").(http.ResponseWriter))
+	http.Redirect(r.Context().Value("w").(http.ResponseWriter), r, "/login", http.StatusSeeOther)
+	return ""
+}
+
+func handleRegistrationError(err error) string {
+	// Check for unique constraint violation
+	if strings.Contains(err.Error(), "unique constraint") {
+		if strings.Contains(err.Error(), "users_username_key") {
+			return "Username already taken"
+		} else if strings.Contains(err.Error(), "users_email_key") {
+			return "Email already registered"
+		}
+		return "Username or email already exists"
+	}
+	
+	log.Printf("Error creating user: %v", err)
+	return "Registration failed"
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
