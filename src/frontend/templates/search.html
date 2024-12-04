@@ -19,18 +19,23 @@
         </div>
 
         <div id="results">
-            {{if .SearchResults}}
-            <!-- If search results exist, iterate over them and display each result as a clickable link. -->
-            {{range .SearchResults}}
-            <div>
-                <!-- Display the title of the result as a link. 
-                     The "href" points to the page URL, and the "title" is the clickable text. -->
-                <h2><a class="search-result-title" href="{{.url}}">{{.title}}</a></h2>
-            </div>
-            {{end}}
+            {{if .Query}}
+                {{if .SearchResults}}
+                    <!-- If search results exist, iterate over them and display each result as a clickable link. -->
+                    {{range .SearchResults}}
+                    <div>
+                        <!-- Display the title of the result as a link. 
+                            The "href" points to the page URL, and the "title" is the clickable text. -->
+                        <h2><a class="search-result-title" href="{{.url}}">{{.title}}</a></h2>
+                    </div>
+                    {{end}}
+                {{else}}
+                    <!-- If no search results are found, display a message indicating that no matches were found for the query. -->
+                    <p>No results found for "{{.Query}}"</p>
+                {{end}}
             {{else}}
-            <!-- If no search results are found, display a message indicating that no matches were found for the query. -->
-            <p>No results found for "{{.Query}}"</p>
+                <!-- Optional: Display a placeholder message for an empty query -->
+                <p>Enter a search term above to see results.</p>
             {{end}}
         </div>
 
