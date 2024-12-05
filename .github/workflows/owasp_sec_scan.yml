@@ -2,9 +2,9 @@ name: OWASP Security Scan
 
 on:
   push:
-    branches: [ owasp_sec_scan ]
+    branches: [ feature/owasp-sec-scan ]
   pull_request:
-    branches: [ owasp_sec_scan ]
+    branches: [ feature/owasp-sec-scan ]
 
 jobs:
   zap_scan:
