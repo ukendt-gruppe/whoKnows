@@ -94,7 +94,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         VALIDATE_GO: true  # Enable linting for Go
         VALIDATE_DOCKERFILE: false  # Disable Dockerfile linting (handled by Hadolint)
-        
+
     - name: Lint Dockerfile.dev
       uses: hadolint/hadolint-action@v3.1.0
       with:
