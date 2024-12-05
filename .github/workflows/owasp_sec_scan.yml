@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   owasp-zap:
-    name: OWASP ZAP Full Scan
+    name: OWASP ZAP Mini-mock Scan
     runs-on: ubuntu-latest
     
     steps:
@@ -42,6 +42,12 @@ jobs:
       - name: Build application
         run: |
           CGO_ENABLED=1 GOOS=linux go build -o whoknows
+        working-directory: src/backend
+
+      - name: Copy frontend templates
+        run: |
+          mkdir -p frontend/templates
+          cp -r ../frontend/templates/* frontend/templates/
         working-directory: src/backend
 
       - name: Start the application
