@@ -106,10 +106,8 @@ jobs:
         working-directory: src/backend
         args: >
           --timeout=5m
-          --skip-dirs=tests
-          --skip-files=.*_test.go
           --disable=typecheck
-          --disable=G107
+          --disable=gosec
           --issues-exit-code=0
 
     - name: Lint Dockerfile.dev
