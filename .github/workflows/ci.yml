@@ -25,6 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         cd src/backend
+        go mod tidy
         go mod download
 
     - name: Run tests with coverage
