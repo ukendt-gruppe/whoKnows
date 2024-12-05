@@ -2,37 +2,76 @@ name: OWASP Security Scan
 
 on:
   push:
-    branches: [ feature/owasp-sec-scan ]
+    branches: [ main ]
   pull_request:
-    branches: [ feature/owasp-sec-scan ]
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0'  # Run weekly on Sundays at midnight
+
+permissions:
+  contents: read
+  issues: write
+  security-events: write
 
 jobs:
-  zap_scan:
-    name: OWASP ZAP API Scan
+  owasp-zap:
+    name: OWASP ZAP Full Scan
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23.1'
-
-      - name: Start application for testing
+          go-version: '1.23.1'  # Updated to match your current Go version
+          
+      - name: Install dependencies
         run: |
-          cd src/backend
+          sudo apt-get update
+          sudo apt-get install -y gcc musl-dev sqlite3
           go mod download
-          nohup go run main.go &
-          sleep 10  # Give the application time to start
+        working-directory: src/backend
 
-      - name: ZAP API Scan
-        uses: zaproxy/action-api-scan@v0.5.0
+      - name: Build application
+        run: |
+          CGO_ENABLED=1 GOOS=linux go build -o whoknows
+        working-directory: src/backend
+
+      - name: Start the application
+        run: |
+          ./whoknows &
+          echo $! > ./pid.file
+          # Wait for the port to be available
+          timeout 30 bash -c 'while ! nc -z localhost 8080; do sleep 1; done'
+        working-directory: src/backend
+
+      - name: ZAP Full Scan
+        uses: zaproxy/action-full-scan@v0.10.0
         with:
-          target: 'http://localhost:8080'
-          fail_action: false  # Don't fail the build for medium/low risks
-          issue_title: 'OWASP ZAP API Scan Report'
           token: ${{ secrets.GITHUB_TOKEN }}
+          target: 'http://localhost:8080'
+          cmd_options: '-a'
+          allow_issue_writing: true
+          issue_title: 'OWASP ZAP Security Report'
+          fail_action: false  # Don't fail the build if vulnerabilities are found
+
+      - name: Upload ZAP Report
+        uses: actions/upload-artifact@v4  # Updated to v4
+        with:
+          name: zap-scan-report
+          path: |
+            zap-scan.html
+            zap-scan.json
+
+      - name: Cleanup
+        if: always()
+        run: |
+          if [ -f ./pid.file ]; then
+            kill $(cat ./pid.file) || true
+          fi
+        working-directory: src/backend
 
   docker_scan:
     name: Docker Security Scan
