@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   owasp-zap:
-    name: OWASP ZAP Mini-mock Scan
+    name: OWASP ZAP Full Scan
     runs-on: ubuntu-latest
     
     steps:
@@ -35,8 +35,8 @@ jobs:
       - name: Create mock environment
         run: |
           echo "ENV_GREETING=test" > .env
-          echo "DATABASE_URL=file::memory:?cache=shared" >> .env
-          echo "WEATHER_API_KEY=dummy-key" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env  # Use a test database URL
+          echo "WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}" >> .env
         working-directory: src/backend
 
       - name: Build application
