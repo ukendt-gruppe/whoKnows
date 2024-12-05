@@ -1,4 +1,4 @@
-FROM nginx:latest
+FROM nginx:1.27.3
 
 # Install certbot and its nginx plugin
 RUN apt-get update && \
