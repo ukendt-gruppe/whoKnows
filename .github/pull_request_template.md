@@ -1,11 +1,20 @@
-## Thx for supporting the Monk Business Project :o)
+## Thx for supporting the Monk Business Project :o) Please check below points -
 
 ### What does your PR provide the project with?
 <!-- Bug fix? Code improvement? Give a short description -->
 
 
-### In which branch do you wish to mergo the changes
+### In which branch do you wish to merge the changes?
+<!-- main, development, etc.? -->
 
-A reference to a related issue in your repository.
-A description of the changes proposed in the pull request.
-@mentions of the person or team responsible for reviewing proposed changes.
+### Documentation updated?
+<!-- Yes/No -->
+
+### Check List
+[] Builds
+[] No lint error
+[] Unit test case update
+
+## Screenshot
+
+Please add appropiate screenshots
