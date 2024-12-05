@@ -2,7 +2,6 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ukendt-gruppe_whoKnows&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ukendt-gruppe_whoKnows)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ukendt-gruppe_whoKnows&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ukendt-gruppe_whoKnows)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ukendt-gruppe_whoKnows&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ukendt-gruppe_whoKnows)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ukendt-gruppe_whoKnows&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ukendt-gruppe_whoKnows)
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=ukendt-gruppe_whoKnows&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=ukendt-gruppe_whoKnows)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=ukendt-gruppe_whoKnows&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=ukendt-gruppe_whoKnows)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=ukendt-gruppe_whoKnows&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=ukendt-gruppe_whoKnows)
