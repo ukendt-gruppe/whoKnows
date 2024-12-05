@@ -23,13 +23,20 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23.1'  # Updated to match your current Go version
+          go-version: '1.23.1'
           
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc musl-dev sqlite3
           go mod download
+        working-directory: src/backend
+
+      - name: Create mock environment
+        run: |
+          echo "ENV_GREETING=test" > .env
+          echo "DATABASE_URL=file::memory:?cache=shared" >> .env
+          echo "WEATHER_API_KEY=dummy-key" >> .env
         working-directory: src/backend
 
       - name: Build application
@@ -56,7 +63,7 @@ jobs:
           fail_action: false  # Don't fail the build if vulnerabilities are found
 
       - name: Upload ZAP Report
-        uses: actions/upload-artifact@v4  # Updated to v4
+        uses: actions/upload-artifact@v4
         with:
           name: zap-scan-report
           path: |
