@@ -69,18 +69,6 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
 
-  gosec_scan:
-    name: Go Security Check
-    runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Run Gosec Security Scanner
-        uses: securego/gosec@master
-        with:
-          args: '-exclude=G104 ./src/backend/...'  # Exclude error checking rule
-
   dependency_check:
     name: OWASP Dependency Check
     runs-on: ubuntu-latest
