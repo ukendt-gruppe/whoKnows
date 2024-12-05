@@ -48,5 +48,3 @@ go run main.go
 cd src
 docker compose -f docker-compose.dev.yml up
 ```
-=======
-
