@@ -1,4 +1,5 @@
 ![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/svdf18/44e7725b61d78d612fa0ee53b3437c78/raw/go-coverage.json)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ukendt-gruppe_whoKnows&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ukendt-gruppe_whoKnows)
 
 # Whoknows (Ukendt Gruppe)
 
