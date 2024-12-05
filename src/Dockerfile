@@ -20,7 +20,7 @@ COPY frontend/ ./frontend/
 RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -o whoknows .
 
 # Create an image for the app - using specific Alpine version
-FROM alpine:3.19.1
+FROM alpine:3.20.3
 
 # Install runtime dependencies
 RUN apk add --no-cache ca-certificates=20230506-r0
