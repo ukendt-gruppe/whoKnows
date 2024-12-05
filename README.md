@@ -22,7 +22,7 @@ cd src
 docker compose -f docker-compose.dev.yml up
 ```
 
-# Whoknows (Ukendt Gruppe)
+# whoKnows (Ukendt Gruppe)
 
 This is the Ukendt Gruppe edit of Whoknows search engine project
 
@@ -49,5 +49,4 @@ Feel free to open a pull request:
 
 3. Await approval
 
-=======
 # whoKnows
