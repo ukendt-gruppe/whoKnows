@@ -92,7 +92,10 @@ jobs:
         
 
     - name: Clear Go Build Cache
-      run: go clean -cache
+      run: |
+        go clean -modcache
+        go clean -cache
+        go clean -testcache
 
     - name: Install dependencies
       run: |
