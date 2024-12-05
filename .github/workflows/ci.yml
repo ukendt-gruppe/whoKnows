@@ -104,6 +104,7 @@ jobs:
       with:
         version: latest
         args: --timeout 5m
+        working-directory: src/backend
 
     - name: Lint Dockerfile.dev
       uses: hadolint/hadolint-action@v3.1.0
