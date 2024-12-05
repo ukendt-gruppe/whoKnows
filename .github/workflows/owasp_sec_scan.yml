@@ -63,10 +63,10 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           target: 'http://localhost:8080'
-          cmd_options: '-a'
+          cmd_options: '-a -m 2'
           allow_issue_writing: true
           issue_title: 'OWASP ZAP Security Report'
-          fail_action: false  # Don't fail the build if vulnerabilities are found
+          fail_action: false
 
       - name: Upload ZAP Report
         uses: actions/upload-artifact@v4
