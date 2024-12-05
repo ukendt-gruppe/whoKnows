@@ -11,9 +11,9 @@
 <!-- Yes/No -->
 
 ### Check List
-[] Builds
-[] No lint error
-[] Unit test case update
+- [ ] Builds
+- [ ] No lint error
+- [ ] Unit test case update
 
 ## Screenshot
 
