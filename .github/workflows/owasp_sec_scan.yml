@@ -2,11 +2,9 @@ name: OWASP Security Scan
 
 on:
   push:
-    branches: [ main ]
+    branches: [ feature/owasp-sec-scan ]
   pull_request:
-    branches: [ main ]
-  schedule:
-    - cron: '0 0 * * 0'  # Run weekly on Sundays at midnight
+    branches: [ feature/owasp-sec-scan ]
 
 permissions:
   contents: read
