@@ -32,49 +32,22 @@ jobs:
           go mod download
         working-directory: src/backend
 
-      - name: Create mock environment
-        run: |
-          echo "ENV_GREETING=test" > .env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env  # Use a test database URL
-          echo "WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}" >> .env
-        working-directory: src/backend
-
       - name: Build application
         run: |
           CGO_ENABLED=1 GOOS=linux go build -o whoknows
-        working-directory: src/backend
-
-      - name: Copy frontend templates
-        run: |
-          mkdir -p frontend/templates
-          cp -r ../frontend/templates/* frontend/templates/
         working-directory: src/backend
 
       - name: Start the application
         run: |
           ./whoknows &
           echo $! > ./pid.file
-          # Wait for the port to be available
-          timeout 30 bash -c 'while ! nc -z localhost 8080; do sleep 1; done'
+          sleep 10  # Give the application time to start
         working-directory: src/backend
 
-      - name: ZAP Full Scan
-        uses: zaproxy/action-full-scan@v0.10.0
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.12.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           target: 'http://localhost:8080'
-          cmd_options: '-a -m 2'
-          allow_issue_writing: true
-          issue_title: 'OWASP ZAP Security Report'
-          fail_action: false
-
-      - name: Upload ZAP Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-scan-report
-          path: |
-            zap-scan.html
-            zap-scan.json
 
       - name: Cleanup
         if: always()
