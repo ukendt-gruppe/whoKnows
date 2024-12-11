@@ -96,7 +96,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} StandardResponse
 // @Failure 500 {object} RequestValidationError
 // @Router /api/weather [get]
-
 func Weather(w http.ResponseWriter, r *http.Request) {
 	weatherData, err := models.FetchWeather("Copenhagen")
 	if err != nil {
