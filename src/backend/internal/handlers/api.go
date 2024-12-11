@@ -36,6 +36,18 @@ type RequestValidationError struct {
 }
 
 // Search handles the /api/search endpoint
+
+// Search godoc
+// @Summary Search content
+// @Description Perform a search across pages and wiki_articles.
+// @Tags search
+// @Accept  json
+// @Produce  json
+// @Param q query string true "Search query"
+// @Param language query string false "Language for search (default: en)"
+// @Success 200 {object} SearchResponse
+// @Failure 500 {object} RequestValidationError
+// @Router /api/search [get]
 func Search(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
 	language := r.URL.Query().Get("language")
@@ -75,6 +87,15 @@ func Search(w http.ResponseWriter, r *http.Request) {
 }
 
 // Weather handles the /api/weather endpoint
+
+// Weather godoc
+// @Summary Get weather data
+// @Description Fetch weather data for a specific location.
+// @Tags weather
+// @Produce  json
+// @Success 200 {object} StandardResponse
+// @Failure 500 {object} RequestValidationError
+// @Router /api/weather [get]
 func Weather(w http.ResponseWriter, r *http.Request) {
 	weatherData, err := models.FetchWeather("Copenhagen")
 	if err != nil {
@@ -94,6 +115,21 @@ func Weather(w http.ResponseWriter, r *http.Request) {
 }
 
 // Register handles the /api/register endpoint
+
+// Register godoc
+// @Summary Register a new user
+// @Description Register a new user with username, email, and password.
+// @Tags auth
+// @Accept  application/x-www-form-urlencoded
+// @Produce  json
+// @Param username formData string true "Username"
+// @Param email formData string true "Email"
+// @Param password formData string true "Password"
+// @Success 201 {object} AuthResponse
+// @Failure 422 {object} RequestValidationError
+// @Failure 409 {object} AuthResponse
+// @Failure 500 {object} RequestValidationError
+// @Router /api/register [post]
 func Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -157,6 +193,20 @@ func Register(w http.ResponseWriter, r *http.Request) {
 }
 
 // Login handles the /api/login endpoint
+
+// Login godoc
+// @Summary Log in a user
+// @Description Log in a user with username and password.
+// @Tags auth
+// @Accept  application/x-www-form-urlencoded
+// @Produce  json
+// @Param username formData string true "Username"
+// @Param password formData string true "Password"
+// @Success 200 {object} AuthResponse
+// @Failure 401 {object} AuthResponse
+// @Failure 422 {object} RequestValidationError
+// @Failure 500 {object} RequestValidationError
+// @Router /api/login [post]
 func Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -221,6 +271,15 @@ func Login(w http.ResponseWriter, r *http.Request) {
 }
 
 // Logout handles the /api/logout endpoint
+
+// Logout godoc
+// @Summary Log out a user
+// @Description Log out the current user and clear the session.
+// @Tags auth
+// @Produce  json
+// @Success 200 {object} AuthResponse
+// @Failure 500 {object} RequestValidationError
+// @Router /api/logout [get]
 func Logout(w http.ResponseWriter, r *http.Request) {
 	session := r.Context().Value("session").(*sessions.Session)
 

@@ -10,6 +10,8 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	httpSwagger "github.com/swaggo/http-swagger"           // Swagger UI middleware
+	_ "github.com/ukendt-gruppe/whoKnows/src/backend/docs" // Import the generated docs package
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/db"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/handlers"
 	"github.com/ukendt-gruppe/whoKnows/src/backend/internal/middleware"
@@ -36,7 +38,6 @@ func init() {
 		MaxAge:   86400 * 7, // 7 days
 		HttpOnly: true,
 	}
-
 }
 
 func main() {
@@ -77,6 +78,9 @@ func main() {
 	// Serve static files
 	fs := http.FileServer(http.Dir("../frontend/static"))
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
+
+	// Swagger route
+	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	// Start the server
 	log.Println("Starting server on :8080")

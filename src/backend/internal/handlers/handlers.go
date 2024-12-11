@@ -230,7 +230,7 @@ func handleRegistrationError(err error) string {
 		}
 		return "Username or email already exists"
 	}
-	
+
 	log.Printf("Error creating user: %v", err)
 	return "Registration failed"
 }
