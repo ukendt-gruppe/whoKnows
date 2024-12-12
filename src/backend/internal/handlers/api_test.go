@@ -71,7 +71,7 @@ func TestRegister(t *testing.T) {
 				// Expect check for existing user
 				mock.ExpectQuery(`SELECT (.+) FROM users WHERE username = \$1`).
 					WithArgs("testuser").
-					WillReturnRows(sqlmock.NewRows([]string{"id", "username", "email", "password"}))
+					WillReturnRows(sqlmock.NewRows([]string{"id", "username", "email", "password", "needs_password_reset"}))
 
 				// Expect insert new user
 				mock.ExpectExec(`INSERT INTO users`).
@@ -90,7 +90,7 @@ func TestRegister(t *testing.T) {
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(`SELECT (.+) FROM users WHERE username = \$1`).
 					WithArgs("existinguser").
-					WillReturnRows(sqlmock.NewRows([]string{"id", "username", "email", "password"}).
+					WillReturnRows(sqlmock.NewRows([]string{"id", "username", "email", "password", "needs_password_reset"}).
 						AddRow(1, "existinguser", testEmail, "hashedpass"))
 			},
 		},
@@ -212,7 +212,7 @@ func TestLogin(t *testing.T) {
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				// Create an actual hashed password for "testpass"
 				hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("testpass"), bcrypt.DefaultCost)
-				rows := sqlmock.NewRows([]string{"id", "username", "email", "password"}).
+				rows := sqlmock.NewRows([]string{"id", "username", "email", "password", "needs_password_reset"}).
 					AddRow(1, "testuser", testEmail, string(hashedPassword))
 				mock.ExpectQuery(`SELECT (.+) FROM users WHERE username = \$1`).
 					WithArgs("testuser").
