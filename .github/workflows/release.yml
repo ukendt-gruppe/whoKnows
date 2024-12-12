@@ -1,5 +1,4 @@
 name: Auto Tagging and Release
-
 on:
   push:
     branches:
@@ -8,28 +7,24 @@ on:
     types: [closed]
     branches:
       - main
-
 jobs:
   release:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v2
-
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
+      
       - name: Push new tag
-        env:
-          GITHUB_PAT: ${{ secrets.PAT }}
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          echo "https://x-access-token:${GITHUB_PAT}@github.com" > ~/.git-credentials
-          git config --global credential.helper store
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          NEXT_TAG="v$(($(echo $LAST_TAG | cut -d'.' -f2) + 1)).0.0"  # Increment minor version
+          NEXT_TAG="v$(($(echo $LAST_TAG | cut -d'.' -f2) + 1)).0.0"
           git tag $NEXT_TAG
           git push origin $NEXT_TAG
-
+      
       - name: Create a GitHub Release
         uses: softprops/action-gh-release@v1
         with:
