@@ -1,0 +1,41 @@
+name: Auto Tagging and Release
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      # Example step to build artifacts (replace with your actual build steps)
+      - name: Build project
+        run: |
+          mkdir -p ./build
+          echo "Building my project..."
+          # Replace the following line with your actual build command
+          # Example: ./build.sh
+          touch ./build/my_project_binary.tar.gz
+
+      - name: Generate and push a new tag
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          NEXT_TAG="v$(($(echo $LAST_TAG | cut -d'.' -f2) + 1))"  # Increment the patch version
+          git tag $NEXT_TAG
+          git push origin $NEXT_TAG
+
+      - name: Create a GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./build/*.tar.gz  # Path to your build artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Automatically provided by GitHub Actions

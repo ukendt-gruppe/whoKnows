@@ -165,7 +165,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "POST" {
-		errorMessage := validateAndRegisterUser(r, session)
+		errorMessage := validateAndRegisterUser(w, r, session)
 		if errorMessage != "" {
 			data["Error"] = errorMessage
 			data["Username"] = r.FormValue("username")
@@ -183,7 +183,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	session.Save(r, w)
 }
 
-func validateAndRegisterUser(r *http.Request, session *sessions.Session) string {
+func validateAndRegisterUser(w http.ResponseWriter, r *http.Request, session *sessions.Session) string {
 	username := r.FormValue("username")
 	email := r.FormValue("email")
 	password := r.FormValue("password")
@@ -198,7 +198,7 @@ func validateAndRegisterUser(r *http.Request, session *sessions.Session) string 
 	user, err := db.GetUser(username)
 	if err != nil && err != db.ErrUserNotFound {
 		log.Printf("Database error checking user: %v", err)
-		http.Error(r.Context().Value("w").(http.ResponseWriter), intErr, http.StatusInternalServerError)
+		http.Error(w, intErr, http.StatusInternalServerError)
 		return ""
 	}
 
@@ -209,13 +209,17 @@ func validateAndRegisterUser(r *http.Request, session *sessions.Session) string 
 	// Create user
 	err = db.CreateUser(username, email, password)
 	if err != nil {
-		return handleRegistrationError(err)
+		log.Printf("Error during user creation: %v", err)
+		if strings.Contains(err.Error(), "unique constraint") {
+			return "Username or email already exists"
+		}
+		return "Registration failed"
 	}
 
 	// Successful registration
 	session.AddFlash("You were successfully registered and can login now")
-	session.Save(r, r.Context().Value("w").(http.ResponseWriter))
-	http.Redirect(r.Context().Value("w").(http.ResponseWriter), r, "/login", http.StatusSeeOther)
+	session.Save(r, w)
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 	return ""
 }
 
