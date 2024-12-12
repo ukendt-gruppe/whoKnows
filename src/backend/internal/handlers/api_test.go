@@ -68,10 +68,10 @@ func TestRegister(t *testing.T) {
 			expectedStatus: http.StatusCreated,
 			expectedBody:   `{"statusCode":201,"message":"User registered successfully"}`,
 			mockSetup: func(mock sqlmock.Sqlmock) {
-				// Expect check for existing user
+				// Expect check for existing user - match the actual columns in your DB
 				mock.ExpectQuery(`SELECT (.+) FROM users WHERE username = \$1`).
 					WithArgs("testuser").
-					WillReturnRows(sqlmock.NewRows([]string{"id", "username", "email", "password"}))
+					WillReturnRows(sqlmock.NewRows([]string{"id", "username", "email", "password", "needs_password_reset"}))
 
 				// Expect insert new user
 				mock.ExpectExec(`INSERT INTO users`).
@@ -90,8 +90,8 @@ func TestRegister(t *testing.T) {
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(`SELECT (.+) FROM users WHERE username = \$1`).
 					WithArgs("existinguser").
-					WillReturnRows(sqlmock.NewRows([]string{"id", "username", "email", "password"}).
-						AddRow(1, "existinguser", testEmail, "hashedpass"))
+					WillReturnRows(sqlmock.NewRows([]string{"id", "username", "email", "password", "needs_password_reset"}).
+						AddRow(1, "existinguser", testEmail, "hashedpass", false))
 			},
 		},
 	}
@@ -188,14 +188,12 @@ func TestSearch(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
-	// Add mock database setup
 	mock, cleanup := setupTest(t)
 	defer cleanup()
 
 	tests := []struct {
-		name   string
-		method string
-
+		name           string
+		method         string
 		username       string
 		password       string
 		expectedStatus int
@@ -210,10 +208,9 @@ func TestLogin(t *testing.T) {
 			expectedStatus: http.StatusOK,
 			expectedBody:   `{"statusCode":200,"message":"Login successful"}`,
 			mockSetup: func(mock sqlmock.Sqlmock) {
-				// Create an actual hashed password for "testpass"
 				hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("testpass"), bcrypt.DefaultCost)
-				rows := sqlmock.NewRows([]string{"id", "username", "email", "password"}).
-					AddRow(1, "testuser", testEmail, string(hashedPassword))
+				rows := sqlmock.NewRows([]string{"id", "username", "email", "password", "needs_password_reset"}).
+					AddRow(1, "testuser", testEmail, string(hashedPassword), false)
 				mock.ExpectQuery(`SELECT (.+) FROM users WHERE username = \$1`).
 					WithArgs("testuser").
 					WillReturnRows(rows)

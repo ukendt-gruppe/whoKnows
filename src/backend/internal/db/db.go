@@ -103,11 +103,11 @@ func GetUser(identifier interface{}) (*User, error) {
 	switch v := identifier.(type) {
 	case string:
 		// Note: Changed ? to $1 for PostgreSQL parameterization
-		err = DB.QueryRow("SELECT id, username, email, password FROM users WHERE username = $1", v).Scan(
-			&user.ID, &user.Username, &user.Email, &user.Password)
+		err = DB.QueryRow("SELECT id, username, email, password, needs_password_reset FROM users WHERE username = $1", v).Scan(
+			&user.ID, &user.Username, &user.Email, &user.Password, &user.NeedsPasswordReset)
 	case int:
-		err = DB.QueryRow("SELECT id, username, email, password FROM users WHERE id = $1", v).Scan(
-			&user.ID, &user.Username, &user.Email, &user.Password)
+		err = DB.QueryRow("SELECT id, username, email, password, needs_password_reset FROM users WHERE id = $1", v).Scan(
+			&user.ID, &user.Username, &user.Email, &user.Password, &user.NeedsPasswordReset)
 	default:
 		return nil, ErrInvalidUser
 	}
@@ -135,10 +135,11 @@ func CreateUser(username, email, password string) error {
 
 // User represents a user in the database.
 type User struct {
-	ID       int
-	Username string
-	Email    string
-	Password string
+	ID                int
+	Username          string
+	Email             string
+	Password          string
+	NeedsPasswordReset bool
 }
 
 func init() {

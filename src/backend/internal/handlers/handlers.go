@@ -165,7 +165,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "POST" {
-		errorMessage := validateAndRegisterUser(r, session)
+		errorMessage := validateAndRegisterUser(w, r, session)
 		if errorMessage != "" {
 			data["Error"] = errorMessage
 			data["Username"] = r.FormValue("username")
@@ -183,7 +183,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	session.Save(r, w)
 }
 
-func validateAndRegisterUser(r *http.Request, session *sessions.Session) string {
+func validateAndRegisterUser(w http.ResponseWriter, r *http.Request, session *sessions.Session) string {
 	username := r.FormValue("username")
 	email := r.FormValue("email")
 	password := r.FormValue("password")
@@ -198,25 +198,28 @@ func validateAndRegisterUser(r *http.Request, session *sessions.Session) string 
 	user, err := db.GetUser(username)
 	if err != nil && err != db.ErrUserNotFound {
 		log.Printf("Database error checking user: %v", err)
-		http.Error(r.Context().Value("w").(http.ResponseWriter), intErr, http.StatusInternalServerError)
+		http.Error(w, intErr, http.StatusInternalServerError)
 		return ""
 	}
 
-	// Username taken check
 	if user != nil {
-		return "Username already taken"
-	}
+        return "Username already taken"
+    }
 
 	// Create user
 	err = db.CreateUser(username, email, password)
 	if err != nil {
-		return handleRegistrationError(err)
+		log.Printf("Error during user creation: %v", err)
+		if strings.Contains(err.Error(), "unique constraint") {
+			return "Username or email already exists"
+		}
+		return "Registration failed"
 	}
 
 	// Successful registration
 	session.AddFlash("You were successfully registered and can login now")
-	session.Save(r, r.Context().Value("w").(http.ResponseWriter))
-	http.Redirect(r.Context().Value("w").(http.ResponseWriter), r, "/login", http.StatusSeeOther)
+	session.Save(r, w)
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 	return ""
 }
 
@@ -301,6 +304,76 @@ func WeatherHandler(w http.ResponseWriter, r *http.Request) {
 	err = templates.ExecuteTemplate(w, "weather", templateData)
 	if err != nil {
 		log.Printf("Error rendering weather template: %v", err)
+		http.Error(w, rendErr, http.StatusInternalServerError)
+	}
+}
+
+func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	session := r.Context().Value("session").(*sessions.Session)
+	user, ok := session.Values["user"].(*db.User)
+	if !ok || user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	data := map[string]interface{}{
+		"User":    user,
+		"Flashes": session.Flashes(),
+	}
+
+	if r.Method == "POST" {
+		currentPassword := r.FormValue("current_password")
+		password := r.FormValue("password")
+		password2 := r.FormValue("password2")
+
+		// Verify current password
+		if !utils.CheckPasswordHash(currentPassword, user.Password) {
+			data["Error"] = "Current password is incorrect"
+			templates.ExecuteTemplate(w, "reset_password", data)
+			return
+		}
+
+		// Check if new password is same as current
+		if currentPassword == password {
+			data["Error"] = "New password must be different from current password"
+			templates.ExecuteTemplate(w, "reset_password", data)
+			return
+		}
+
+		// Verify new passwords match
+		if password != password2 {
+			data["Error"] = "The new passwords do not match"
+			templates.ExecuteTemplate(w, "reset_password", data)
+			return
+		}
+
+		// Hash and update password
+		hashedPassword, err := utils.HashPassword(password)
+		if err != nil {
+			http.Error(w, intErr, http.StatusInternalServerError)
+			return
+		}
+
+		// Update password in database
+		_, err = db.DB.Exec("UPDATE users SET password = $1, needs_password_reset = FALSE WHERE id = $2",
+			hashedPassword, user.ID)
+		if err != nil {
+			http.Error(w, intErr, http.StatusInternalServerError)
+			return
+		}
+
+		// Update session
+		user.NeedsPasswordReset = false
+		session.Values["user"] = user
+		session.AddFlash("Your password has been updated successfully")
+		session.Save(r, w)
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	err := templates.ExecuteTemplate(w, "reset_password", data)
+	if err != nil {
 		http.Error(w, rendErr, http.StatusInternalServerError)
 	}
 }

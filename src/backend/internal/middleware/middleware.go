@@ -36,3 +36,23 @@ func SessionMiddleware(store sessions.Store) func(http.Handler) http.Handler {
         })
     }
 }
+
+func PasswordResetCheckMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        // Skip check for certain paths
+        if r.URL.Path == "/reset-password" || r.URL.Path == "/login" || r.URL.Path == "/logout" || r.URL.Path == "/static/" {
+            next.ServeHTTP(w, r)
+            return
+        }
+
+        session := r.Context().Value("session").(*sessions.Session)
+        if user, ok := session.Values["user"].(*db.User); ok && user != nil {
+            if user.NeedsPasswordReset {
+                http.Redirect(w, r, "/reset-password", http.StatusSeeOther)
+                return
+            }
+        }
+        
+        next.ServeHTTP(w, r)
+    })
+}
