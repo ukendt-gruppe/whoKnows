@@ -17,25 +17,20 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v2
 
-      # Example step to build artifacts (replace with your actual build steps)
-      - name: Build project
+      - name: Push new tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.ORG_PAT }}  # Organization PAT secret
         run: |
-          mkdir -p ./build
-          echo "Building my project..."
-          # Replace the following line with your actual build command
-          # Example: ./build.sh
-          touch ./build/my_project_binary.tar.gz
-
-      - name: Generate and push a new tag
-        run: |
-          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
-          NEXT_TAG="v$(($(echo $LAST_TAG | cut -d'.' -f2) + 1))"  # Increment the patch version
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          NEXT_TAG="v$(($(echo $LAST_TAG | cut -d'.' -f2) + 1)).0.0"  # Increment minor version
           git tag $NEXT_TAG
           git push origin $NEXT_TAG
 
       - name: Create a GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ./build/*.tar.gz  # Path to your build artifacts
+          files: ./build/*.tar.gz  # Artifacts to attach to the release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Automatically provided by GitHub Actions
+          GITHUB_TOKEN: ${{ secrets.ORG_PAT }}
