@@ -54,6 +54,7 @@ func main() {
 	r.Use(middleware.LoggingMiddleware)
 	r.Use(middleware.PrometheusMiddleware)
 	r.Use(middleware.SessionMiddleware(store))
+	r.Use(middleware.PasswordResetCheckMiddleware)
 
 	// Set up routes
 	r.HandleFunc("/", handlers.SearchHandler).Methods("GET")
@@ -63,6 +64,7 @@ func main() {
 	r.HandleFunc("/logout", handlers.LogoutHandler).Methods("GET")
 	r.HandleFunc("/weather", handlers.WeatherHandler).Methods("GET")
 	r.HandleFunc("/greeting", handlers.Greeting).Methods("GET")
+	r.HandleFunc("/reset-password", handlers.ResetPasswordHandler).Methods("GET", "POST")
 
 	// Prometheus metrics endpoint
 	r.Handle("/metrics", promhttp.Handler())
