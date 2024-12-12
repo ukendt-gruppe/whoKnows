@@ -19,7 +19,7 @@ jobs:
 
       - name: Push new tag
         env:
-          GITHUB_PAT: ${{ secrets.ORG_PAT }}
+          GITHUB_PAT: ${{ secrets.PAT }}
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
@@ -35,4 +35,4 @@ jobs:
         with:
           files: ./build/*.tar.gz
         env:
-          GITHUB_TOKEN: ${{ secrets.ORG_PAT }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
