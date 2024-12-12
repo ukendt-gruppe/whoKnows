@@ -4,7 +4,7 @@ go 1.23.1
 
 require (
 	github.com/gorilla/sessions v1.4.0
-	golang.org/x/crypto v0.30.0
+	golang.org/x/crypto v0.31.0
 )
 
 require (
