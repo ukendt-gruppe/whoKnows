@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+    <!-- Background -->
+    <rect width="1200" height="800" fill="white"/>
+    
+    <!-- Title -->
+    <text x="600" y="40" font-size="24" fill="#333" text-anchor="middle" font-family="Arial">Ukendt Gruppe DevOps System: The Three Ways</text>
+
+    <!-- First Way: Flow -->
+    <g opacity="0.95">
+        <rect x="50" y="80" width="1100" height="250" rx="10" fill="#f9f9ff" stroke="#333" stroke-width="2"/>
+        <text x="100" y="110" font-size="18" fill="#333" font-family="Arial">First Way: Flow</text>
+
+        <!-- Development -->
+        <rect x="80" y="130" width="200" height="180" rx="5" fill="white" stroke="#333" stroke-width="1"/>
+        <text x="180" y="150" font-size="14" fill="#333" text-anchor="middle" font-family="Arial">Development</text>
+        
+        <!-- Dev Tools -->
+        <rect x="100" y="170" width="160" height="60" rx="5" fill="#f9f9ff" stroke="#333" stroke-width="1"/>
+        <rect x="100" y="240" width="160" height="60" rx="5" fill="#f9f9ff" stroke="#333" stroke-width="1"/>
+        <text x="180" y="190" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Go App</text>
+        <text x="180" y="205" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Local Environment</text>
+        <text x="180" y="220" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Docker Dev Container</text>
+        <text x="180" y="260" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">DB/Scraper</text>
+        <text x="180" y="275" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Docker Dev Container</text>
+
+        <!-- CI Pipeline -->
+        <rect x="320" y="130" width="200" height="180" rx="5" fill="white" stroke="#333" stroke-width="1"/>
+        <text x="420" y="150" font-size="14" fill="#333" text-anchor="middle" font-family="Arial">CI Pipeline</text>
+        
+        <!-- CI Steps -->
+        <rect x="340" y="170" width="160" height="60" rx="5" fill="#f9f9ff" stroke="#333" stroke-width="1"/>
+        <text x="420" y="190" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Tests + Linting</text>
+        <text x="420" y="205" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Security Scans</text>
+
+        <rect x="340" y="240" width="160" height="60" rx="5" fill="#f9f9ff" stroke="#333" stroke-width="1"/>
+        <text x="420" y="260" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Connectivity testing</text>
+        <text x="420" y="275" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Security Scans</text>
+
+        <!-- Registry -->
+        <rect x="560" y="130" width="200" height="180" rx="5" fill="white" stroke="#333" stroke-width="1"/>
+        <text x="660" y="150" font-size="14" fill="#333" text-anchor="middle" font-family="Arial">CD Pipeline</text>
+        
+        <!-- Images -->
+        <rect x="580" y="170" width="160" height="60" rx="5" fill="#f9f9ff" stroke="#333" stroke-width="1"/>
+        <text x="660" y="190" font-size="11" fill="#333" text-anchor="middle" font-family="Arial">GitHub Container Registry</text>
+        <text x="660" y="205" font-size="11" fill="#333" text-anchor="middle" font-family="Arial">App Image</text>
+        <text x="660" y="220" font-size="11" fill="#333" text-anchor="middle" font-family="Arial">Nginx Image</text>
+
+        <rect x="580" y="240" width="160" height="60" rx="5" fill="#f9f9ff" stroke="#333" stroke-width="1"/>
+        <text x="660" y="260" font-size="11" fill="#333" text-anchor="middle" font-family="Arial">Terraform w. initialization scripts</text>
+        <text x="660" y="275" font-size="11" fill="#333" text-anchor="middle" font-family="Arial">Alembic migrations</text>
+        <text x="660" y="290" font-size="11" fill="#333" text-anchor="middle" font-family="Arial">PostgresSQL Image</text>
+
+        <!-- Production -->
+        <rect x="800" y="130" width="320" height="180" rx="5" fill="white" stroke="#333" stroke-width="1"/>
+        <text x="960" y="150" font-size="14" fill="#333" text-anchor="middle" font-family="Arial">Azure Production</text>
+        
+        <!-- VMs -->
+        <rect x="820" y="170" width="140" height="60" rx="5" fill="#f9f9ff" stroke="#333" stroke-width="1"/>
+        <text x="890" y="190" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">App VM</text>
+        <text x="890" y="220" font-size="11" fill="#333" text-anchor="middle" font-family="Arial">Go + Nginx</text>
+        
+        <rect x="970" y="170" width="140" height="60" rx="5" fill="#f9f9ff" stroke="#333" stroke-width="1"/>
+        <text x="1040" y="190" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">DB VM</text>
+        <text x="1040" y="220" font-size="11" fill="#333" text-anchor="middle" font-family="Arial">PostgreSQL</text>
+
+        <rect x="820" y="240" width="290" height="60" rx="5" fill="#f9f9ff" stroke="#333" stroke-width="1"/>
+        <text x="970" y="260" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Monitoring</text>
+        <text x="970" y="290" font-size="11" fill="#333" text-anchor="middle" font-family="Arial">Prometheus + Grafana</text>
+    </g>
+
+    <!-- Second Way: Feedback -->
+    <g opacity="0.95">
+        <rect x="50" y="350" width="1100" height="200" rx="10" fill="#bbbbff" stroke="#333" stroke-width="2"/>
+        <text x="100" y="380" font-size="18" fill="#333" font-family="Arial">Second Way: Feedback</text>
+
+        <!-- CI Quality Gates -->
+        <rect x="80" y="400" width="320" height="130" rx="5" fill="white" stroke="#333" stroke-width="1"/>
+        <text x="240" y="425" font-size="14" fill="#333" text-anchor="middle" font-family="Arial">Quality Gates</text>
+        <text x="240" y="455" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Security + Code Quality Scans</text>
+        <text x="240" y="480" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Test Coverage</text>
+        <text x="240" y="505" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">OpenAPI Validation</text>
+
+        <!-- System Health -->
+        <rect x="440" y="400" width="320" height="130" rx="5" fill="white" stroke="#333" stroke-width="1"/>
+        <text x="600" y="425" font-size="14" fill="#333" text-anchor="middle" font-family="Arial">System Health</text>
+        <text x="600" y="455" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Prometheus Metrics</text>
+        <text x="600" y="480" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Postman Monitors</text>
+        <text x="600" y="505" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Performance Tracking</text>
+
+        <!-- Visualization -->
+        <rect x="800" y="400" width="320" height="130" rx="5" fill="white" stroke="#333" stroke-width="1"/>
+        <text x="960" y="425" font-size="14" fill="#333" text-anchor="middle" font-family="Arial">Data Analysis</text>
+        <text x="960" y="455" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Grafana Dashboards</text>
+        <text x="960" y="480" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Usage Patterns</text>
+        <text x="960" y="505" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">System Behavior</text>
+    </g>
+    
+    <!-- Third Way: Learning -->
+    <g opacity="0.95">
+        <rect x="50" y="570" width="1100" height="200" rx="10" fill="#bbffbb" stroke="#333" stroke-width="2"/>
+        <text x="100" y="600" font-size="18" fill="#333" font-family="Arial">Third Way: Learning</text>
+
+        <!-- Testing -->
+        <rect x="80" y="620" width="320" height="130" rx="5" fill="white" stroke="#333" stroke-width="1"/>
+        <text x="240" y="645" font-size="14" fill="#333" text-anchor="middle" font-family="Arial">Testing &amp; Discovery</text>
+        <text x="240" y="675" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Feature Branches</text>
+        <text x="240" y="700" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Technical Exploration</text>
+        <text x="240" y="725" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Continuous Integration</text>
+
+        <!-- Collaboration -->
+        <rect x="440" y="620" width="320" height="130" rx="5" fill="white" stroke="#333" stroke-width="1"/>
+        <text x="600" y="645" font-size="14" fill="#333" text-anchor="middle" font-family="Arial">Team Collaboration</text>
+        <text x="600" y="675" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Pull Requests + Code Reviews</text>
+        <text x="600" y="700" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Documentation</text>
+        <text x="600" y="725" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Knowledge Sharing + Pair Programming</text>
+
+        <!-- Improvement -->
+        <rect x="800" y="620" width="320" height="130" rx="5" fill="white" stroke="#333" stroke-width="1"/>
+        <text x="960" y="645" font-size="14" fill="#333" text-anchor="middle" font-family="Arial">System Evolution</text>
+        <text x="960" y="675" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Metrics Analysis</text>
+        <text x="960" y="700" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Process Automation</text>
+        <text x="960" y="725" font-size="12" fill="#333" text-anchor="middle" font-family="Arial">Infrastructure Changes</text>
+    </g>
+
+    <!-- Flow Arrows -->
+    <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+        </marker>
+    </defs>
+    
+    <!-- Main Flow -->
+    <path d="M280 220 H320" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M520 220 H560" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <path d="M760 220 H800" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+</svg>
